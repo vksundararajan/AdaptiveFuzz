@@ -1,0 +1,1 @@
+uv --directory . run fuzzagent.py --verbose

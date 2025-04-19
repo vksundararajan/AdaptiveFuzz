@@ -1,0 +1,13 @@
+{
+    "mcpServers": {
+      "AdaptiveFuzz": {
+          "command": "/Users/eshwa/.local/bin/uv",
+          "args": [
+              "--directory",
+              "/Users/eshwa/Documents/local-git/AdaptiveFuzz",
+              "run",
+              "fuzzagent.py"
+          ]
+      }
+    }
+  }
