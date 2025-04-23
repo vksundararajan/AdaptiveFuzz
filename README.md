@@ -16,4 +16,4 @@ It uses an MCP server to create an LLM agent that performs tasks like enumeratio
 <br>
 The LLM acts as the decision-maker, analyzing outputs and choosing the next step during the pentesting process.
 
-<a href="doc/recording.mov">Watch Full Demo</a>
+<a href="doc/recording.mov">Watch Full Demo</a> and <a href="doc/Screenshots/">Screenshots</a>
