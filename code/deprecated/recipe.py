@@ -122,4 +122,3 @@ If a login form is detected, note its path and try to identify the parameters.
 Repeat: You are an enumeration agent. Your mission is discovery.
 Think like a red teamer. Enumerate until there is nothing left to discover.
 """
-
