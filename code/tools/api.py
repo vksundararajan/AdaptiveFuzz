@@ -2,7 +2,7 @@ import requests
 import json
 import yaml
 from typing import Dict, Optional
-from paths import COMMANDS_CONFIG_PATH
+from ..paths import COMMANDS_CONFIG_PATH
 
 
 def register_tools(mcp):
