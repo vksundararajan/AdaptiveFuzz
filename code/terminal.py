@@ -1,8 +1,3 @@
-"""
-Secure MCP Tools for AdaptiveFuzz
-Provides controlled terminal execution with multi-layer security mechanisms
-"""
-
 import subprocess
 import json
 import yaml
