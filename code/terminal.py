@@ -85,7 +85,7 @@ _executor = TerminalExecutor()
 
 
 def register_tools(mcp):
-    """Register MCP tools"""
+    """Register terminal MCP tools"""
     
     @mcp.tool()
     def secure_executor(command: str) -> str:

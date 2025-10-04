@@ -147,3 +147,13 @@ protected_paths:
 # Execution limits
 limits:
   command_timeout: 60
+
+# Security headers for web pentesting
+security_headers:
+  Strict-Transport-Security: "Enforces HTTPS connections"
+  Content-Security-Policy: "Prevents XSS and injection attacks"
+  X-Content-Type-Options: "Prevents MIME-type sniffing"
+  X-Frame-Options: "Prevents clickjacking"
+  X-XSS-Protection: "Enables XSS filter in browser"
+  Referrer-Policy: "Controls referrer information"
+  Permissions-Policy: "Controls browser features"
