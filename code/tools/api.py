@@ -11,16 +11,17 @@ def register_tools(mcp):
     @mcp.tool()
     def make_http_request(url: str, method: str = "GET", headers: str = "{}", data: str = "") -> str:
         """
-        Make a custom HTTP request with full control over method, headers, and data.
+        Sends HTTP requests to test API endpoints and web services. Use this to probe targets with custom methods, 
+        headers, and payloads. Automatically handles URLs without schemes by defaulting to http://.
         
         Args:
-            url: Target URL
-            method: HTTP method (GET, POST, PUT, DELETE, etc.)
-            headers: JSON string of custom headers
-            data: Request body/data
+            url: Target URL (scheme optional, defaults to http://)
+            method: HTTP method - GET, POST, PUT, DELETE, PATCH, etc.
+            headers: JSON string containing custom HTTP headers
+            data: Request body content for POST/PUT requests
             
         Returns:
-            HTTP response body
+            Raw HTTP response body text
             
         Examples:
             {"url": "http://target.com/api", "method": "POST", "data": "test=1"}
@@ -50,13 +51,15 @@ def register_tools(mcp):
     @mcp.tool()
     def check_security_headers(url: str) -> str:
         """
-        Check a website for important security headers.
+        Analyzes a website's HTTP response headers for security weaknesses. Checks for presence of critical 
+        security headers (CSP, HSTS, etc.) and identifies information disclosure issues like exposed server 
+        versions. Returns a formatted report with checkmarks, crosses, and warnings.
         
         Args:
-            url: Target URL to analyze
+            url: Target URL to analyze (scheme optional, defaults to https://)
             
         Returns:
-            List of security headers with status (present/missing) and warnings
+            Formatted report showing which security headers are present/missing plus any disclosure warnings
             
         Examples:
             {"url": "https://example.com"}

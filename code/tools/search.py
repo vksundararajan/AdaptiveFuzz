@@ -22,21 +22,23 @@ def register_tools(mcp):
         show_url: bool = False
     ) -> str:
         """
-        Search Exploit Database for known exploits with advanced options.
+        Searches the Exploit Database for publicly available exploits matching software versions or CVE IDs. 
+        Uses the searchsploit command-line tool with flexible filtering options. Useful for finding known 
+        vulnerabilities in identified technologies.
         
         Args:
-            query: Search term (e.g., "Apache 2.4", "WordPress 5.0")
-            case_sensitive: Perform case-sensitive search (default: False)
-            exact_match: Exact match on exploit title (default: False)
-            strict: Strict version matching, no fuzzy search (default: False)
-            title_only: Search only exploit title, not file path (default: False)
-            exclude: Terms to exclude from results, separated by "|" (e.g., "PoC|dos")
-            cve: Search by CVE ID instead of query (e.g., "CVE-2021-44228")
-            json_output: Return results in JSON format (default: False)
-            show_url: Show exploit-db.com URLs instead of local paths (default: False)
+            query: Software name and version to search (e.g., "Apache 2.4", "WordPress 5.0")
+            case_sensitive: Enable case-sensitive matching
+            exact_match: Match exact exploit title only
+            strict: Disable fuzzy matching for precise version searches
+            title_only: Search exploit titles only, ignore file paths
+            exclude: Pipe-separated terms to filter out (e.g., "PoC|dos")
+            cve: Search by CVE identifier instead of query string
+            json_output: Return structured JSON instead of text
+            show_url: Show exploit-db.com URLs rather than local paths
             
         Returns:
-            Search results from ExploitDB
+            List of matching exploits with titles, paths/URLs, and metadata
             
         Examples:
             {"query": "Apache 2.4.49", "title_only": true}
@@ -87,14 +89,16 @@ def register_tools(mcp):
     @mcp.tool()
     def detect_technologies(url: str, headers_only: bool = False) -> str:
         """
-        Detect web technologies and frameworks used by a website using webtech.
+        Fingerprints web technologies, frameworks, and libraries used by a target website. Analyzes HTTP headers 
+        and page content to identify technologies like web servers, CMS platforms, JavaScript frameworks, and more. 
+        Returns detailed JSON with confidence levels for each detection.
         
         Args:
-            url: Target URL or domain
-            headers_only: Only use HTTP headers for detection, skip page content analysis (default: False)
+            url: Target URL or domain (scheme optional, defaults to http://)
+            headers_only: Skip page content analysis and use only HTTP headers for faster but less complete detection
             
         Returns:
-            Detected technologies, versions, categories, and confidence levels
+            JSON report with detected technologies, versions, categories, and confidence scores
             
         Examples:
             {"url": "example.com"}
@@ -115,13 +119,15 @@ def register_tools(mcp):
     @mcp.tool()
     def lookup_cve(cve_id: str) -> str:
         """
-        Lookup CVE vulnerability details from National Vulnerability Database.
+        Retrieves detailed vulnerability information from the National Vulnerability Database (NVD) API. 
+        Provides comprehensive CVE data including descriptions, severity scores (CVSS), affected products, 
+        and reference links. Essential for understanding the impact and exploitability of identified vulnerabilities.
         
         Args:
-            cve_id: CVE identifier (format: CVE-YYYY-NNNNN)
+            cve_id: CVE identifier in format CVE-YYYY-NNNNN (e.g., CVE-2021-44228)
             
         Returns:
-            CVE details including description, CVSS score, and references
+            Complete JSON response from NVD with vulnerability description, CVSS metrics, references, and affected configurations
             
         Examples:
             {"cve_id": "CVE-2021-44228"}

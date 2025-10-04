@@ -90,13 +90,15 @@ def register_tools(mcp):
     @mcp.tool()
     def secure_executor(command: str) -> str:
         """
-        Execute a shell command in the terminal and return the output.
+        Executes shell commands with built-in security controls. Commands are validated against a blacklist 
+        of dangerous patterns before execution. Has timeout protection and maintains execution history. 
+        Use this for running pentesting tools like nmap, curl, nikto, or system commands.
         
         Args:
-            command: Shell command to execute
+            command: Shell command to execute (validated against security blacklist)
             
         Returns:
-            Command output or error message
+            Command stdout/stderr output, or error/blocked message if command violates security rules
             
         Examples:
             {"command": "whoami"}
@@ -108,20 +110,24 @@ def register_tools(mcp):
     @mcp.tool()
     def get_executor_history() -> str:
         """
-        Get the history of all previously executed commands and their results.
+        Retrieves the complete execution log of all commands run during this session. Each entry includes 
+        the command text, output, return code, and whether it was blocked. Useful for reviewing what actions 
+        have been taken and troubleshooting failed commands.
         
         Returns:
-            JSON array of command history with outputs and return codes
+            JSON array containing full command history with commands, outputs, return codes, and blocked status
         """
         return _executor.get_history()
     
     @mcp.tool()
     def get_allowed_commands() -> str:
         """
-        Get the list of allowed/safe commands for pentesting operations.
+        Returns the whitelist of approved commands for pentesting from the configuration file. Includes both 
+        system commands (ls, cat, grep, etc.) and pentesting tools (nmap, nikto, dirb, etc.). Reference this 
+        to understand which commands are available and safe to use.
         
         Returns:
-            JSON object with safe commands list from configuration
+            JSON object with categorized lists of whitelisted system and pentesting commands
         """
         with open(COMMANDS_CONFIG_PATH, 'r') as f:
             config = yaml.safe_load(f)
