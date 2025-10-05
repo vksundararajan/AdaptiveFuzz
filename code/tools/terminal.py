@@ -14,11 +14,9 @@ class TerminalExecutor:
     
     def execute_command(self, command: str) -> str:
         """Execute a shell command and return the output"""
-        # Load config
         with open(COMMANDS_CONFIG_PATH, 'r') as f:
             config = yaml.safe_load(f)
         
-        # Security check: Validate against blacklist patterns
         for pattern in config['blacklist_patterns']:
             if re.search(pattern, command, re.IGNORECASE):
                 blocked_msg = f"🚫 COMMAND BLOCKED\n\nCommand matched blacklist pattern: {pattern}\n\nThis command is not allowed for security reasons."
@@ -31,7 +29,6 @@ class TerminalExecutor:
                 return blocked_msg
         
         try:
-            # Execute command
             result = subprocess.run(
                 command,
                 shell=True,
@@ -40,7 +37,6 @@ class TerminalExecutor:
                 timeout=config['limits']['command_timeout']
             )
             
-            # Combine stdout and stderr
             output = result.stdout
             if result.stderr:
                 output += f"\n[STDERR]\n{result.stderr}"
@@ -80,7 +76,6 @@ class TerminalExecutor:
         return json.dumps(self.history, indent=2)
 
 
-# Singleton instance
 _executor = TerminalExecutor()
 
 
