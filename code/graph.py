@@ -9,10 +9,11 @@ from .nodes import (
     make_web_analyzer_node,
     make_exploit_researcher_node,
     make_reporter_node,
+)
+from .routes import (
     route_from_fuzzer,
     route_from_scanner,
 )
-
 from consts import (
     FUZZER,
     SCANNER,
