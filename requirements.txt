@@ -2,3 +2,4 @@ python-dotenv
 pyyaml
 requests
 webtech
+langgraph
