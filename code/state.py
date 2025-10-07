@@ -2,7 +2,7 @@ from typing import List, Optional, TypedDict, Dict, Any
 from typing_extensions import Annotated
 from langchain_core.messages import AnyMessage, SystemMessage, HumanMessage
 from langgraph.graph.message import add_messages
-from .prompt_builder import build_prompt
+from prompt_builder import build_prompt
 
 
 class AdaptiveState(TypedDict):

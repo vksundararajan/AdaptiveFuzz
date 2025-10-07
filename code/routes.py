@@ -1,5 +1,5 @@
 from typing import Literal
-from .state import AdaptiveState
+from state import AdaptiveState
 from consts import (
     FUZZER,
     SCANNER,

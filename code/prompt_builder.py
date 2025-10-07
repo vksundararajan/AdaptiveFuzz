@@ -1,5 +1,5 @@
-from .paths import PROMPTS_CONFIG_PATH
-from .utils import load_yaml_file
+from paths import PROMPTS_CONFIG_PATH
+from utils import load_yaml_file
 
 
 def build_prompt(agent_name: str) -> str:

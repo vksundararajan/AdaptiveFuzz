@@ -2,8 +2,8 @@ import subprocess
 import json
 import re
 from typing import List, Dict
-from ..paths import COMMANDS_CONFIG_PATH
-from ..utils import load_yaml_file
+from paths import COMMANDS_CONFIG_PATH
+from utils import load_yaml_file
 
 
 class TerminalExecutor:
