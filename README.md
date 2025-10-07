@@ -3,7 +3,7 @@
 [![Status: Ongoing](https://img.shields.io/badge/status-Ongoing-gold?style=flat-square)](https://github.com/vksundararajan/AdaptiveFuzz/issues)
 
 
-AdaptiveFuzz automates and organises reconnaissance for authorised penetration tests using an LLM-backed, multi-controller design that orchestrates purpose-driven components and external tools into concise, auditable findings.
+AdaptiveFuzz streamlines and manages reconnaissance for authorised penetration testing by using an LLM-based, multi-controller approach. This system coordinates targeted modules and external tools and produces clear, auditable reports that help document the findings.
 
 ## Expected Outcome
 
