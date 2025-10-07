@@ -1,8 +1,8 @@
 import requests
 import json
-import yaml
 from typing import Dict, Optional
 from ..paths import COMMANDS_CONFIG_PATH
+from ..utils import load_yaml_file
 
 
 def register_tools(mcp):
@@ -72,8 +72,7 @@ def register_tools(mcp):
         response = requests.get(url, timeout=10, allow_redirects=True)
         
         # Load security headers from config
-        with open(COMMANDS_CONFIG_PATH, 'r') as f:
-            config = yaml.safe_load(f)
+        config = load_yaml_file(COMMANDS_CONFIG_PATH)
         security_headers = config.get('security_headers', {})
         
         # Check which headers are present

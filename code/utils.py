@@ -1,4 +1,6 @@
 import os
+import yaml
+from typing import Any, Dict
 from langgraph.graph import StateGraph
 from langchain_core.runnables.graph import MermaidDrawMethod
 from langchain_google_genai import ChatGoogleGenerativeAI
@@ -27,6 +29,25 @@ def get_llm(llm_model: str):
             f"Allowed Gemini models: {sorted(ALLOWED_MODELS)}"
         )
 
+
+def load_yaml_file(file_path: str) -> Dict[str, Any]:
+    """
+    Load and parse a YAML configuration file.
+    
+    Args:
+        file_path: Path to the YAML file
+    
+    Returns:
+        Parsed YAML content as a dictionary
+    
+    Raises:
+        FileNotFoundError: If the file doesn't exist
+        yaml.YAMLError: If the file is not valid YAML
+    """
+    with open(file_path, 'r') as f:
+        config = yaml.safe_load(f)
+    return config
+    
 
 def save_graph_visualization(
     graph: StateGraph,

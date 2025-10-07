@@ -1,5 +1,5 @@
-import yaml
 from .paths import PROMPTS_CONFIG_PATH
+from .utils import load_yaml_file
 
 
 def build_prompt(agent_name: str) -> str:
@@ -12,8 +12,7 @@ def build_prompt(agent_name: str) -> str:
     Returns:
         Complete formatted prompt string
     """
-    with open(PROMPTS_CONFIG_PATH, 'r') as f:
-        config = yaml.safe_load(f)
+    config = load_yaml_file(PROMPTS_CONFIG_PATH)
     
     agents_config = config['adaptive_system']['agents']
     agent_config = agents_config[agent_name]['prompt_config']

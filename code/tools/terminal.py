@@ -1,9 +1,9 @@
 import subprocess
 import json
-import yaml
 import re
 from typing import List, Dict
 from ..paths import COMMANDS_CONFIG_PATH
+from ..utils import load_yaml_file
 
 
 class TerminalExecutor:
@@ -14,8 +14,7 @@ class TerminalExecutor:
     
     def execute_command(self, command: str) -> str:
         """Execute a shell command and return the output"""
-        with open(COMMANDS_CONFIG_PATH, 'r') as f:
-            config = yaml.safe_load(f)
+        config = load_yaml_file(COMMANDS_CONFIG_PATH)
         
         for pattern in config['blacklist_patterns']:
             if re.search(pattern, command, re.IGNORECASE):
@@ -124,8 +123,7 @@ def register_tools(mcp):
         Returns:
             JSON object with categorized lists of whitelisted system and pentesting commands
         """
-        with open(COMMANDS_CONFIG_PATH, 'r') as f:
-            config = yaml.safe_load(f)
+        config = load_yaml_file(COMMANDS_CONFIG_PATH)
         
         return json.dumps({
             "system_commands": sorted(config['system_commands']),
