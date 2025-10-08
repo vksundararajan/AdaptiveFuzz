@@ -16,7 +16,7 @@ RECON_EXECUTOR_MESSAGES = "recon_executor_messages"
 RESULT_INTERPRETER_MESSAGES = "result_interpreter_messages"
 STRATEGY_ADVISOR_MESSAGES = "strategy_advisor_messages"
 HUMAN_IN_LOOP_MESSAGES = "human_in_loop_messages"
-SESSION_ID = "session_id"
+FUZZ_ID = "fuzz_id"
 TARGET_IP = "target_ip"
 PENDING_TASKS = "pending_tasks"
 EXECUTED_COMMANDS = "executed_commands"
@@ -24,6 +24,7 @@ FINDINGS = "findings"
 POLICY = "policy"
 CYCLE = "cycle"
 LAST_UPDATE_TS = "last_update_ts"
+KEEP_LOOP = "keep_loop"
 
 
 # Allowed LLM models
