@@ -7,7 +7,7 @@ from utils import load_yaml_file
 PROMPTS_CONFIG: Dict[str, Any] = load_yaml_file(PROMPTS_CONFIG_PATH)
 
 
-def build_prompt(agent: str) -> str:
+def make_prompt(agent: str) -> str:
     """Construct a system prompt string for the given agent key defined in prompts.yaml."""
 
     agent_entry = PROMPTS_CONFIG["adaptive_system"]["agents"][agent]
