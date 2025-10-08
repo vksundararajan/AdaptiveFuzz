@@ -76,29 +76,3 @@ def save_graph_visualization(
     except Exception as e:
         print(f"⚠️ Could not save graph image: {e}")
         return None
-
-
-def save_report(report_content: str, target_ip: str, output_dir: str = None) -> str:
-    """
-    Save penetration testing report to a markdown file.
-    
-    Args:
-        report_content: The markdown report content
-        target_ip: Target IP address (used for filename)
-        output_dir: Directory to save the report (defaults to OUTPUT_DIR from paths.py)
-    
-    Returns:
-        Path to the saved report file
-    """
-    if output_dir is None:
-        output_dir = OUTPUT_DIR
-
-    os.makedirs(output_dir, exist_ok=True)
-    
-    report_filename = f"{target_ip}.md"
-    report_path = os.path.join(output_dir, report_filename)
-    
-    with open(report_path, 'w', encoding='utf-8') as f:
-        f.write(report_content)
-    
-    return report_filename
