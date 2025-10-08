@@ -1,35 +1,49 @@
+from typing import Any, Dict, Sequence
+
 from paths import PROMPTS_CONFIG_PATH
 from utils import load_yaml_file
 
 
-def build_prompt(agent_name: str) -> str:
-    """
-    Build a complete prompt from YAML configuration.
-    
-    Args:
-        agent_name: The name of the agent (fuzzer, scanner, enumerator, web_analyzer, exploit_researcher, reporter)
-    
-    Returns:
-        Complete formatted prompt string
-    """
-    config = load_yaml_file(PROMPTS_CONFIG_PATH)
-    
-    agents_config = config['adaptive_system']['agents']
-    agent_config = agents_config[agent_name]['prompt_config']
-    
-    prompt_parts = []
-    prompt_parts.append(f"Role: {agent_config['role']}")
-    prompt_parts.append(f"\n{agent_config['instruction']}")
-    
-    if 'output_constraints' in agent_config:
-        prompt_parts.append("\nOutput Constraints:")
-        for constraint in agent_config['output_constraints']:
-            prompt_parts.append(f"- {constraint}")
-    
-    if 'style_or_tone' in agent_config:
-        prompt_parts.append(f"\nStyle/Tone: {agent_config['style_or_tone']}")
-    
-    if 'goal' in agent_config:
-        prompt_parts.append(f"\nGoal: {agent_config['goal']}")
-    
-    return "\n".join(prompt_parts)
+PROMPTS_CONFIG: Dict[str, Any] = load_yaml_file(PROMPTS_CONFIG_PATH)
+
+
+def build_prompt(agent: str) -> str:
+    """Construct a system prompt string for the given agent key defined in prompts.yaml."""
+
+    agent_entry = PROMPTS_CONFIG["adaptive_system"]["agents"][agent]
+    raw_config: Dict[str, Any] = dict(agent_entry.get("prompt_config", {}))
+    parts = [f"Agent: {agent}"]
+
+    section_order = (
+        ("role", "Role"),
+        ("context", "Context"),
+        ("instruction", "Instruction"),
+        ("rules", "Rules"),
+        ("examples", "Examples"),
+        ("output_format", "Output Format"),
+        ("output_constraints", "Output Constraints"),
+        ("style_or_tone", "Style / Tone"),
+        ("goal", "Goal"),
+        ("notes", "Notes"),
+    )
+
+    for key, label in section_order:
+        if key not in raw_config:
+            continue
+        value = raw_config.pop(key)
+        if value is None:
+            continue
+        formatted = value.strip() if isinstance(value, str) else str(value)
+        if formatted:
+            parts.append(f"{label}:\n{formatted}")
+
+    for extra_key in list(raw_config.keys()):
+        value = raw_config.pop(extra_key)
+        if value is None:
+            continue
+        formatted = value.strip() if isinstance(value, str) else str(value)
+        if formatted:
+            label = extra_key.replace("_", " ").title()
+            parts.append(f"{label}:\n{formatted}")
+
+    return "\n\n".join(parts)

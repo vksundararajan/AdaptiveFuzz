@@ -6,7 +6,7 @@ adaptive_system:
 
   agents:
     conversational_handler:
-      llm: gpt-4o-mini
+      llm: gemini-2.5-flash
       prompt_config:
         role: Reconnaissance task planner
         instruction: |
@@ -18,14 +18,14 @@ adaptive_system:
             - command_args: JSON object of key/value arguments needed to build the shell command
             - depends_on: array of task ids this task waits for (use [] if none)
             - rationale: single-sentence reason referencing prior context or findings
-          ⚠️ Rules:
+          ⚠️  Rules:
             - Stay within reconnaissance scope and respect policy limits if provided.
             - Keep tasks minimal, sequential, and unambiguous.
             - Avoid speculation, exploitation, or brute-force language.
         context: |
           Operates under authorised penetration-testing scope. Policy is session-specific and authoritative.
         output_format: json
-        output_constraints:
+        output_constraints: |
           - Array length between 2 and 5 inclusive
           - Each task object must contain all required keys
           - Task order must reflect execution order and declared dependencies
@@ -33,7 +33,7 @@ adaptive_system:
         goal: Populate state.pending_tasks with actionable, policy-compliant task objects
 
     recon_executor:
-      llm: gpt-4o-mini
+      llm: gemini-2.5-flash
       prompt_config:
         role: Recon execution specialist with MCP tool access
         instruction: |
@@ -61,7 +61,7 @@ adaptive_system:
         context: |
           All executions run on controlled infrastructure. Every action must be auditable and within authorised scope.
         output_format: json
-        output_constraints:
+        output_constraints: |
           - Return a JSON array of execution records matching the task order
           - Every record must include exec_id and task_id
           - Evidence references must be unique per successful run
@@ -69,7 +69,7 @@ adaptive_system:
         goal: Fill state.executed_commands with auditable execution records respecting policy constraints
 
     result_interpreter:
-      llm: gpt-4o-mini
+      llm: gemini-2.5-flash
       prompt_config:
         role: Reconnaissance data interpreter
         instruction: |
@@ -92,14 +92,14 @@ adaptive_system:
         context: |
           Findings feed downstream strategy decisions; keep them concise, factual, and machine-usable.
         output_format: json
-        output_constraints:
+        output_constraints: |
           - Each finding must reference at least one evidence_id
           - Avoid duplicate findings for the same fact; consolidate into details
         style_or_tone: Analytical, factual, audit-friendly
         goal: Populate state.findings with normalized reconnaissance findings
 
     strategy_advisor:
-      llm: gpt-4o-mini
+      llm: gemini-2.5-flash
       prompt_config:
         role: Reconnaissance strategy advisor
         instruction: |
@@ -131,14 +131,14 @@ adaptive_system:
         context: |
           Output is reviewed by the human-in-loop before next cycle. Maintain clarity and operational safety.
         output_format: json
-        output_constraints:
+        output_constraints: |
           - 3-5 strategy_proposal entries
           - policy_proposal must be null or include all listed keys
         style_or_tone: Strategic, risk-aware, collaborative
         goal: Provide next-step recommendations and optional policy adjustments aligned with state fields
 
     human_in_loop:
-      llm: gpt-4o-mini
+      llm: gemini-2.5-flash
       prompt_config:
         role: Reconnaissance supervisor and decision-maker
         instruction: |
@@ -149,27 +149,10 @@ adaptive_system:
             - Strategy recommendations with priority tags
             - Any pending approvals (e.g., policy_proposal.require_human_approval)
           Ask for confirmation, rejection, or modification of proposed tasks/policy before next cycle.
-        context: |
-          Human operator has final authority. Be clear, concise, and surface only the most relevant data.
+        context: Human operator has final authority. Be clear, concise, and surface only the most relevant data.
         output_format: markdown
-        output_constraints:
+        output_constraints: |
           - Keep summary under 250 words
           - Present approvals as checklist items
         style_or_tone: Professional, collaborative, decision-oriented
         goal: Equip the human participant to authorize the next cycle
-
-global:
-  defaults:
-    allowlist_tools: ["nmap", "ffuf", "gobuster", "curl", "dig", "whatweb", "nikto"]
-    denylist_commands: ["--script=vuln", "--exploit", "--bruteforce"]
-    rate_limits:
-      requests_per_sec: 50
-      concurrency: 3
-    output_encoding: utf-8
-    require_human_approval_for_policy_changes: true
-
-notes:
-  - All agent outputs must be valid JSON (except human_in_loop, which outputs markdown).
-  - Policy is session-scoped; Recon Executor must enforce it before running commands.
-  - Evidence artifacts should be stored with their evidence_id for reproducibility.
-  - Human approval is required for any policy change flagged as require_human_approval=true.
