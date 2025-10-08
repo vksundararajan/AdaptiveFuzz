@@ -3,105 +3,55 @@ from langgraph.graph import StateGraph, START, END
 
 from state import AdaptiveState
 from nodes import (
-    make_fuzzer_node,
-    make_scanner_node,
-    make_enumerator_node,
-    make_web_analyzer_node,
-    make_exploit_researcher_node,
-    make_reporter_node,
+    make_ch_node,
+    make_re_node,
+    make_ri_node,
+    make_sa_node,
+    make_hr_node,
 )
-from routes import (
-    route_from_fuzzer,
-    route_from_scanner,
-)
+from routes import route_from_human
 from consts import (
-    FUZZER,
-    SCANNER,
-    ENUMERATOR,
-    WEB_ANALYZER,
-    EXPLOIT_RESEARCHER,
-    REPORTER,
+    CONVERSATIONAL_HANDLER,
+    RECON_EXECUTOR,
+    RESULT_INTERPRETER,
+    STRATEGY_ADVISOR,
+    HUMAN_IN_LOOP,
 )
 
 def build_adaptive_graph(config: Dict[str, Any]) -> StateGraph:
     """
-    Creates and returns the AdaptiveFuzz penetration testing graph.
-    
-    Workflow:
-        START → Fuzzer (Supervisor) → Scanner → Web Analyzer/Enumerator → 
-        Fuzzer → Exploit Researcher → Fuzzer → Reporter → END
-    
-    The Fuzzer acts as an intelligent router:
-    - Routes to Scanner when only user input exists
-    - Routes to Exploit Researcher when enumeration data exists but no exploits
-    - Routes to Reporter when both enumeration and exploit data exist
-    
-    Routing Logic:
-    - Start → Fuzzer (always starts with the supervisor)
-    - Fuzzer uses conditional routing to decide next step. Based on state content, 
-      routes to: Scanner, Exploit Researcher, or Reporter
-    - Scanner uses conditional routing based on port types discovered. Routes to 
-      Web Analyzer if web ports found, Enumerator otherwise
-    - After Web Analyzer completes, return to Fuzzer for next decision
-    - After Enumerator completes, return to Fuzzer for next decision
-    - After Exploit Researcher completes, return to Fuzzer
-    - Reporter validates findings, generates final report, and ends the workflow
-    
-    Args:
-        config: Configuration dictionary containing agent settings
-    
-    Returns:
-        Compiled LangGraph StateGraph
+    Build the AdaptiveFuzz graph.
     """
     graph = StateGraph(AdaptiveState)
-    
 
-    ### ADD NODES
-    fuzzer_node = make_fuzzer_node(llm_model=config["agents"]["fuzzer"]["llm"])
-    graph.add_node(FUZZER, fuzzer_node)
-    
-    scanner_node = make_scanner_node(llm_model=config["agents"]["scanner"]["llm"])
-    graph.add_node(SCANNER, scanner_node)
-    
-    enumerator_node = make_enumerator_node(llm_model=config["agents"]["enumerator"]["llm"])
-    graph.add_node(ENUMERATOR, enumerator_node)
-    
-    web_analyzer_node = make_web_analyzer_node(llm_model=config["agents"]["web_analyzer"]["llm"])
-    graph.add_node(WEB_ANALYZER, web_analyzer_node)
-    
-    exploit_researcher_node = make_exploit_researcher_node(llm_model=config["agents"]["exploit_researcher"]["llm"])
-    graph.add_node(EXPLOIT_RESEARCHER, exploit_researcher_node)
-    
-    reporter_node = make_reporter_node(llm_model=config["agents"]["reporter"]["llm"])
-    graph.add_node(REPORTER, reporter_node)
-    
+    conversational_handler_node = make_ch_node(llm_model=config["agents"][CONVERSATIONAL_HANDLER]["llm"])
+    graph.add_node(CONVERSATIONAL_HANDLER, conversational_handler_node)
 
-    ### ADD EDGES AND CONDITIONAL ROUTING
-    graph.add_edge(START, FUZZER)
-    
+    recon_executor_node = make_re_node(llm_model=config["agents"][RECON_EXECUTOR]["llm"])
+    graph.add_node(RECON_EXECUTOR, recon_executor_node)
+
+    result_interpreter_node = make_ri_node(llm_model=config["agents"][RESULT_INTERPRETER]["llm"])
+    graph.add_node(RESULT_INTERPRETER, result_interpreter_node)
+
+    strategy_advisor_node = make_sa_node(llm_model=config["agents"][STRATEGY_ADVISOR]["llm"])
+    graph.add_node(STRATEGY_ADVISOR, strategy_advisor_node)
+
+    human_in_loop_node = make_hr_node(llm_model=config["agents"][HUMAN_IN_LOOP]["llm"])
+    graph.add_node(HUMAN_IN_LOOP, human_in_loop_node)
+
+    graph.add_edge(START, CONVERSATIONAL_HANDLER)
+    graph.add_edge(CONVERSATIONAL_HANDLER, RECON_EXECUTOR)
+    graph.add_edge(RECON_EXECUTOR, RESULT_INTERPRETER)
+    graph.add_edge(RESULT_INTERPRETER, STRATEGY_ADVISOR)
+    graph.add_edge(STRATEGY_ADVISOR, HUMAN_IN_LOOP)
+
     graph.add_conditional_edges(
-        FUZZER,
-        route_from_fuzzer,
+        HUMAN_IN_LOOP,
+        route_from_human,
         {
-            SCANNER: SCANNER,
-            EXPLOIT_RESEARCHER: EXPLOIT_RESEARCHER,
-            REPORTER: REPORTER,
+            "continue": CONVERSATIONAL_HANDLER,
+            "stop": END,
         },
     )
-    
-    graph.add_conditional_edges(
-        SCANNER,
-        route_from_scanner,
-        {
-            WEB_ANALYZER: WEB_ANALYZER,
-            ENUMERATOR: ENUMERATOR,
-            FUZZER: FUZZER,
-        },
-    )
-    
-    graph.add_edge(WEB_ANALYZER, FUZZER)
-    graph.add_edge(ENUMERATOR, FUZZER)
-    graph.add_edge(EXPLOIT_RESEARCHER, FUZZER)
-    graph.add_edge(REPORTER, END)
-    
+
     return graph.compile()
