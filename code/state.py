@@ -15,20 +15,19 @@ class AdaptiveState(TypedDict):
     strategy_advisor_messages: Annotated[List[AnyMessage], add_messages]
     human_in_loop_messages: Annotated[List[AnyMessage], add_messages]
 
-    ### orchestration --- added
-    session_id: str
+    ### AdaptiveFuzz State Keys --- added
+    fuzz_id: str
     target: Dict[str, Any] 
-    current_agent: str  # e.g. "conversational_handler" | "recon_executor" | ...
-    pending_tasks: List[Dict[str, Any]]  # {"id","action","args"}
-    executed_commands: List[Dict[str, Any]]  # {"id","tool","command","stdout","stderr","status","ts"}
-    findings: List[Dict[str, Any]]  # {"id","type","summary","evidence_ids","confidence"}
-    policy: Optional[Dict[str, Any]]  # minimal safety limits, rate limits
-    cycle: int  # increments per loop
-    last_update_ts: Optional[str]
+    pending_tasks: List[Dict[str, Any]] 
+    executed_commands: List[Dict[str, Any]] 
+    findings: List[Dict[str, Any]] 
+    policy: Optional[Dict[str, Any]] 
+    cycle: int 
+    last_update_ts: Optional[str] 
 
 
 def initialize_adaptive_state(
-    session_id: str,
+    fuzz_id: str,
     conversational_handler_prompt: Dict[str, Any],
     recon_executor_prompt: Dict[str, Any],
     result_interpreter_prompt: Dict[str, Any],
@@ -52,9 +51,8 @@ def initialize_adaptive_state(
         result_interpreter_messages=ri_msgs,
         strategy_advisor_messages=sa_msgs,
         human_in_loop_messages=hi_msgs,
-        session_id=session_id,
+        fuzz_id=fuzz_id,
         target=target or {},
-        current_agent="conversational_handler",
         pending_tasks=[],
         executed_commands=[],
         findings=[],

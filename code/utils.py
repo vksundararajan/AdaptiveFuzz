@@ -64,15 +64,23 @@ def save_graph_visualization(
     """
     if save_dir is None:
         save_dir = OUTPUT_DIR
-    
+
+    graph_output_dir = save_dir
+    os.makedirs(graph_output_dir, exist_ok=True)
+
+    png_path = os.path.join(graph_output_dir, f"{graph_name}.png")
+    mermaid_path = os.path.join(graph_output_dir, f"{graph_name}.mmd")
+
     try:
-        png = graph.get_graph().draw_mermaid_png(draw_method=MermaidDrawMethod.API)
-        os.makedirs(save_dir, exist_ok=True)
-        save_path = os.path.join(save_dir, f"{graph_name}.png")
-        with open(save_path, "wb") as f:
-            f.write(png)
-        print(f"✅ Graph saved to {save_path}")
-        return save_path
-    except Exception as e:
-        print(f"⚠️ Could not save graph image: {e}")
-        return None
+        png_bytes = graph.get_graph().draw_mermaid_png(draw_method=MermaidDrawMethod.API)
+        with open(png_path, "wb") as f:
+            f.write(png_bytes)
+        return png_path
+    except Exception:
+        try:
+            mermaid_source = graph.get_graph().draw_mermaid()
+            with open(mermaid_path, "w", encoding="utf-8") as f:
+                f.write(mermaid_source)
+            return mermaid_path
+        except Exception:
+            return None
