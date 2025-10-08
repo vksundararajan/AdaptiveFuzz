@@ -1,5 +1,3 @@
-"""Entry point for running the AdaptiveFuzz reconnaissance workflow."""
-
 from __future__ import annotations
 
 from pprint import pprint
@@ -17,9 +15,10 @@ from graph import build_adaptive_graph
 from paths import PROMPTS_CONFIG_PATH
 from state import initialize_adaptive_state
 from utils import load_yaml_file, save_graph_visualization
+from to_prompt import c_prompt
 
 
-def run_adaptivefuzz(user_query: str) -> Dict[str, Any]:
+def run_adaptivefuzz(target_ip: str, user_query: str) -> Dict[str, Any]:
 	"""Run the AdaptiveFuzz LangGraph for the provided reconnaissance request."""
 
 	config = load_yaml_file(PROMPTS_CONFIG_PATH)
@@ -41,14 +40,16 @@ def run_adaptivefuzz(user_query: str) -> Dict[str, Any]:
 	# 	"user_query": user_query,
 	# }
 
+	fuzz_id = str(uuid.uuid4())
+
 	initial_state = initialize_adaptive_state(
-		fuzz_id=final_state["fuzz_id"],
-		conversational_handler_prompt=CONVERSATIONAL_HANDLER,
-		recon_executor_prompt=RECON_EXECUTOR,
-		result_interpreter_prompt=RESULT_INTERPRETER,
-		strategy_advisor_prompt=STRATEGY_ADVISOR,
-		human_in_loop_prompt=user_query,
-		target={"user_request": user_query},
+		fuzz_id=fuzz_id,
+		target_ip=target_ip,
+		human_in_loop=user_query,
+		conversational_handler=CONVERSATIONAL_HANDLER,
+		recon_executor=RECON_EXECUTOR,
+		result_interpreter=RESULT_INTERPRETER,
+		strategy_advisor=STRATEGY_ADVISOR,
 	)
 
 	final_state = graph.invoke(initial_state)
@@ -59,28 +60,21 @@ def main() -> None:
 	"""CLI entry point for AdaptiveFuzz."""
 
 	print("=" * 80)
-	print("🌀 AdaptiveFuzz")
+	print("⚠️ AdaptiveFuzz")
 	print("=" * 80)
-	print("Provide a single, well-scoped reconnaissance objective for the agents to pursue.\n")
+	print("\n")
 
-	while True:
-		try:
-			user_query = input("Enter the reconnaissance objective or target: ").strip()
-		except KeyboardInterrupt:  # pragma: no cover - user-controlled exit
-			print("\nAborted by user.")
-			raise SystemExit(1)
+	target_ip = c_prompt("Target IP Address: ")
+	print("\n⚠️ Your assistant is coming online...")
+	user_query = c_prompt("Fuzzer⋙ ")
 
-		if user_query:
-			break
-
-		print("A non-empty objective is required. Please try again.\n")
-
-	final_state = run_adaptivefuzz(user_query)
+	final_state = run_adaptivefuzz(target_ip, user_query)
 
 	print("\n" + "=" * 80)
 	print("✅ AdaptiveFuzz run completed")
 	print("=" * 80)
 	print("FUZZ ID:", final_state.get("fuzz_id"))
+	print("Target IP:", final_state.get("target_ip"))
 	print("Cycle count:", final_state.get("cycle"))
 	print("Pending tasks:")
 	pprint(final_state.get("pending_tasks", []))

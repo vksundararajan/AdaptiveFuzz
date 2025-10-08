@@ -47,3 +47,22 @@ def make_prompt(agent: str) -> str:
             parts.append(f"{label}:\n{formatted}")
 
     return "\n\n".join(parts)
+
+
+def c_prompt(
+    prompt_text: str,
+    empty_warning: str = "Ask Anything!",
+) -> str:
+    """Prompt the user until a non-empty, stripped response is provided."""
+
+    while True:
+        try:
+            value = input(prompt_text).strip()
+        except KeyboardInterrupt: 
+            print("\n⚠️ Aborted by user.")
+            raise SystemExit(1)
+
+        if value:
+            return value
+
+    print(f"{empty_warning}\n")

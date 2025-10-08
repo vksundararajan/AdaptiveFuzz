@@ -17,7 +17,7 @@ class AdaptiveState(TypedDict):
 
     ### AdaptiveFuzz State Keys --- added
     fuzz_id: str
-    target: Dict[str, Any] 
+    target_ip: str 
     pending_tasks: List[Dict[str, Any]] 
     executed_commands: List[Dict[str, Any]] 
     findings: List[Dict[str, Any]] 
@@ -28,22 +28,20 @@ class AdaptiveState(TypedDict):
 
 def initialize_adaptive_state(
     fuzz_id: str,
-    conversational_handler_prompt: Dict[str, Any],
-    recon_executor_prompt: Dict[str, Any],
-    result_interpreter_prompt: Dict[str, Any],
-    strategy_advisor_prompt: Dict[str, Any],
-    human_in_loop_prompt: Optional[Dict[str, Any]] = None,
-    target: Optional[Dict[str, Any]] = None,
+    target_ip: str,
+    human_in_loop_prompt: str,
+    conversational_handler: str,
+    recon_executor: str,
+    result_interpreter: str,
+    strategy_advisor: str,    
 ) -> AdaptiveState:
     """Initialize a compact reconnaissance-oriented AdaptiveState."""
 
-    ch_msgs: List[AnyMessage] = [SystemMessage(make_prompt(conversational_handler_prompt))]
-    re_msgs: List[AnyMessage] = [SystemMessage(make_prompt(recon_executor_prompt))]
-    ri_msgs: List[AnyMessage] = [SystemMessage(make_prompt(result_interpreter_prompt))]
-    sa_msgs: List[AnyMessage] = [SystemMessage(make_prompt(strategy_advisor_prompt))]
-    hi_msgs: List[AnyMessage] = []
-    if human_in_loop_prompt:
-        hi_msgs.append(SystemMessage(make_prompt(human_in_loop_prompt)))
+    ch_msgs: List[AnyMessage] = [SystemMessage(make_prompt(conversational_handler))]
+    re_msgs: List[AnyMessage] = [SystemMessage(make_prompt(recon_executor))]
+    ri_msgs: List[AnyMessage] = [SystemMessage(make_prompt(result_interpreter))]
+    sa_msgs: List[AnyMessage] = [SystemMessage(make_prompt(strategy_advisor))]
+    hi_msgs: List[AnyMessage] = [SystemMessage(make_prompt(human_in_loop_prompt))]
 
     return AdaptiveState(
         conversational_handler_messages=ch_msgs,
@@ -52,7 +50,7 @@ def initialize_adaptive_state(
         strategy_advisor_messages=sa_msgs,
         human_in_loop_messages=hi_msgs,
         fuzz_id=fuzz_id,
-        target=target or {},
+        target_ip=target_ip,
         pending_tasks=[],
         executed_commands=[],
         findings=[],
