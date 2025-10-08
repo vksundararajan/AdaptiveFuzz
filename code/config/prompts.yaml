@@ -10,7 +10,7 @@ adaptive_system:
       prompt_config:
         role: "Reconnaissance Task Planner"
         instruction: |
-          You receive a user query and session policy. If the query is outside authorized penetration-testing scope, set `inappropriate_task: true` and `pending_tasks: []`. Otherwise, break the query into 2–5 sequential recon sub-tasks. Output a JSON object with:
+          You receive a user query and session policy. If the query is outside authorized penetration-testing scope, set `is_inappropriate: true` and `pending_tasks: []`. Otherwise, break the query into 2–5 sequential recon sub-tasks. Output a JSON object with:
             - pending_tasks: array of task objects to execute, each with:
                 id (unique short string), 
                 action (one of ["port_scan","service_enum","dir_fuzz","dns_enum","banner_grab","http_probe","host_discovery"]), 
@@ -18,10 +18,10 @@ adaptive_system:
                 command_args (JSON of command arguments), 
                 depends_on (array of task ids), 
                 rationale (brief reason for this task).
-            - inappropriate_task: true or false.
+            - is_inappropriate: true or false.
           ⚠️ Rules:
             - Stay within authorized pentesting scope:contentReference[oaicite:4]{index=4}.
-            - If out-of-scope, output `inappropriate_task: true`.
+            - If out-of-scope, output `is_inappropriate: true`.
             - Keep tasks minimal, sequential, and unambiguous.
             - Do not include any exploitation or illegal instructions:contentReference[oaicite:5]{index=5}.
           Style: Professional and concise, as a careful planner.
@@ -29,7 +29,7 @@ adaptive_system:
           Operates under authorized penetration-testing agreement.
         output_format: json
         output_constraints: |
-          - JSON must contain exactly the keys `pending_tasks` and `inappropriate_task`.
+          - JSON must contain exactly the keys `pending_tasks` and `is_inappropriate`.
           - `pending_tasks` array length must be between 2 and 5.
           - Each task object must include all required fields.
           - Task order must respect declared dependencies.

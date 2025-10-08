@@ -24,8 +24,9 @@ FINDINGS = "findings"
 POLICY = "policy"
 CYCLE = "cycle"
 LAST_UPDATE_TS = "last_update_ts"
-KEEP_LOOP = "keep_loop"
+TO_LOOP = "to_loop"
 STRATEGIES = "strategies"
+IS_INAPPROPRIATE = "is_inappropriate"
 
 
 # Allowed LLM models
