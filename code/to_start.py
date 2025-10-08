@@ -60,18 +60,18 @@ def main() -> None:
 	"""CLI entry point for AdaptiveFuzz."""
 
 	print("=" * 80)
-	print("⚠️ AdaptiveFuzz")
+	print("⚠️  AdaptiveFuzz")
 	print("=" * 80)
 	print("\n")
 
 	target_ip = c_prompt("Target IP Address: ")
-	print("\n⚠️ Your assistant is coming online...")
+	print("\n⚠️  Your assistant is coming online...")
 	user_query = c_prompt("Fuzzer⋙ ")
 
 	final_state = run_adaptivefuzz(target_ip, user_query)
 
 	print("\n" + "=" * 80)
-	print("✅ AdaptiveFuzz run completed")
+	print("✅  AdaptiveFuzz run completed")
 	print("=" * 80)
 	print("FUZZ ID:", final_state.get("fuzz_id"))
 	print("Target IP:", final_state.get("target_ip"))

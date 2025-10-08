@@ -25,6 +25,7 @@ POLICY = "policy"
 CYCLE = "cycle"
 LAST_UPDATE_TS = "last_update_ts"
 KEEP_LOOP = "keep_loop"
+STRATEGIES = "strategies"
 
 
 # Allowed LLM models

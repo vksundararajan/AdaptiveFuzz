@@ -19,10 +19,12 @@ class AdaptiveState(TypedDict):
     fuzz_id: str
     target_ip: str
     keep_loop: bool
+    is_inappropriate: bool
     pending_tasks: List[Dict[str, Any]]
     executed_commands: List[Dict[str, Any]]
     findings: List[Dict[str, Any]]
     policy: Optional[Dict[str, Any]]
+    strategies: List[str]
     cycle: int
     last_update_ts: Optional[str]
 
@@ -57,7 +59,9 @@ def initialize_adaptive_state(
         executed_commands=[],
         findings=[],
         policy=None,
+        strategies=[],
         cycle=0,
         last_update_ts=None,
         keep_loop=keep_loop,
+        is_inappropriate=False,
     )

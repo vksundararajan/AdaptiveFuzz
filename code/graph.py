@@ -2,6 +2,7 @@ from typing import Any, Dict
 from langgraph.graph import StateGraph, START, END
 
 from state import AdaptiveState
+from routes import route_from_human, route_from_conversational_handler
 from nodes import (
     make_ch_node,
     make_re_node,
@@ -9,7 +10,6 @@ from nodes import (
     make_sa_node,
     make_hr_node,
 )
-from routes import route_from_human
 from consts import (
     CONVERSATIONAL_HANDLER,
     RECON_EXECUTOR,
@@ -40,7 +40,16 @@ def build_adaptive_graph(config: Dict[str, Any]) -> StateGraph:
     graph.add_node(HUMAN_IN_LOOP, human_in_loop_node)
 
     graph.add_edge(START, CONVERSATIONAL_HANDLER)
-    graph.add_edge(CONVERSATIONAL_HANDLER, RECON_EXECUTOR)
+
+    graph.add_conditional_edges(
+        CONVERSATIONAL_HANDLER,
+        route_from_conversational_handler,
+        {
+            "review": HUMAN_IN_LOOP,
+            "proceed": RECON_EXECUTOR,
+        },
+    )
+
     graph.add_edge(RECON_EXECUTOR, RESULT_INTERPRETER)
     graph.add_edge(RESULT_INTERPRETER, STRATEGY_ADVISOR)
     graph.add_edge(STRATEGY_ADVISOR, HUMAN_IN_LOOP)

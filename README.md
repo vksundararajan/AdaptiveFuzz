@@ -31,7 +31,8 @@ graph TD;
 	human_in_loop(human_in_loop)
 	__end__([<p>__end__</p>]):::last
 	__start__ --> conversational_handler;
-	conversational_handler --> recon_executor;
+	conversational_handler -. &nbsp;review&nbsp; .-> human_in_loop;
+	conversational_handler -. &nbsp;proceed&nbsp; .-> recon_executor;
 	human_in_loop -. &nbsp;stop&nbsp; .-> __end__;
 	human_in_loop -. &nbsp;continue&nbsp; .-> conversational_handler;
 	recon_executor --> result_interpreter;
