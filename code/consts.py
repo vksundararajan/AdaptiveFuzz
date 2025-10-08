@@ -6,6 +6,27 @@ STRATEGY_ADVISOR = "strategy_advisor"
 HUMAN_IN_LOOP = "human_in_loop"
 
 
+# Config Keys
+ADAPTIVE_SYSTEM = "adaptive_system"
+
+
+# State Keys
+CONVERSATIONAL_HANDLER_MESSAGES = "conversational_handler_messages"
+RECON_EXECUTOR_MESSAGES = "recon_executor_messages"
+RESULT_INTERPRETER_MESSAGES = "result_interpreter_messages"
+STRATEGY_ADVISOR_MESSAGES = "strategy_advisor_messages"
+HUMAN_IN_LOOP_MESSAGES = "human_in_loop_messages"
+SESSION_ID = "session_id"
+TARGET = "target"
+CURRENT_AGENT = "current_agent"
+PENDING_TASKS = "pending_tasks"
+EXECUTED_COMMANDS = "executed_commands"
+FINDINGS = "findings"
+POLICY = "policy"
+CYCLE = "cycle"
+LAST_UPDATE_TS = "last_update_ts"
+
+
 # Allowed LLM models
 ALLOWED_MODELS = [
     "gemini-2.5-pro",
