@@ -1,7 +1,7 @@
 from typing import Any, Dict, Sequence
 
 from paths import PROMPTS_CONFIG_PATH
-from utils import load_yaml_file
+from to_support import load_yaml_file
 
 
 PROMPTS_CONFIG: Dict[str, Any] = load_yaml_file(PROMPTS_CONFIG_PATH)

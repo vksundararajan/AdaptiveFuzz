@@ -45,20 +45,13 @@ graph TD;
 
 ## MCP Tools
 
-AdaptiveFuzz utilises 8 specialised MCP tools that orchestrate intelligent penetration testing workflows. Each tool is designed for a specific phase of the security assessment lifecycle.
+AdaptiveFuzz is powered by 8 security-focused MCP tools that help pentesters sort out their own security assessment.
 
-- `make_http_request` Send customised HTTP requests with complete control over methods, headers, and payloads. Useful for testing API endpoints and web service vulnerabilities.
-
-- `check_security_headers` Analyse security headers to identify missing protections and information disclosure risks in HTTP responses.
-
-- `search_exploitdb` Search the Exploit Database for known exploits matching discovered software versions or CVE identifiers. Supports advanced filtering and precise version matching.
-
-- `detect_technologies` Perform automated technology stack fingerprinting using webtech. Identifies frameworks, libraries, and platforms with confidence scoring.
-
-- `lookup_cve` Retrieve detailed vulnerability intelligence from the National Vulnerability Database, including CVSS metrics, impact assessments, and remediation references.
-
-- `secure_executor` Run penetration testing commands in a sandboxed environment with blacklist validation, timeout controls, and comprehensive logging.
-
-- `get_executor_history` View complete audit trails of executed commands, including outputs, return codes, and security validation results.
-
-- `get_allowed_commands` Access the curated whitelist of approved system utilities and pentesting tools available for execution.
+- make_http_request
+- check_security_headers
+- search_exploitdb 
+- detect_technologies
+- lookup_cve
+- secure_executor
+- get_executor_history
+- get_allowed_commands
