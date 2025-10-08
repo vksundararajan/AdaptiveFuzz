@@ -17,13 +17,14 @@ class AdaptiveState(TypedDict):
 
     ### AdaptiveFuzz State Keys --- added
     fuzz_id: str
-    target_ip: str 
-    pending_tasks: List[Dict[str, Any]] 
-    executed_commands: List[Dict[str, Any]] 
-    findings: List[Dict[str, Any]] 
-    policy: Optional[Dict[str, Any]] 
-    cycle: int 
-    last_update_ts: Optional[str] 
+    target_ip: str
+    keep_loop: bool
+    pending_tasks: List[Dict[str, Any]]
+    executed_commands: List[Dict[str, Any]]
+    findings: List[Dict[str, Any]]
+    policy: Optional[Dict[str, Any]]
+    cycle: int
+    last_update_ts: Optional[str]
 
 
 def initialize_adaptive_state(
@@ -33,7 +34,8 @@ def initialize_adaptive_state(
     conversational_handler: str,
     recon_executor: str,
     result_interpreter: str,
-    strategy_advisor: str,    
+    strategy_advisor: str,
+    keep_loop: bool = True,
 ) -> AdaptiveState:
     """Initialize a compact reconnaissance-oriented AdaptiveState."""
 
@@ -57,4 +59,5 @@ def initialize_adaptive_state(
         policy=None,
         cycle=0,
         last_update_ts=None,
+        keep_loop=keep_loop,
     )
