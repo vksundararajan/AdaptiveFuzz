@@ -15,9 +15,32 @@ AdaptiveFuzz streamlines and manages reconnaissance for authorised penetration t
 
 ## Architecture
 
-<p align="center">
-  <img src="docs/graph.png" width="90%" alt="AdaptiveFuzz Architecture"/>
-</p>
+
+```mermaid
+---
+config:
+  flowchart:
+    curve: linear
+---
+graph TD;
+	__start__([<p>__start__</p>]):::first
+	conversational_handler(conversational_handler)
+	recon_executor(recon_executor)
+	result_interpreter(result_interpreter)
+	strategy_advisor(strategy_advisor)
+	human_in_loop(human_in_loop)
+	__end__([<p>__end__</p>]):::last
+	__start__ --> conversational_handler;
+	conversational_handler --> recon_executor;
+	human_in_loop -. &nbsp;stop&nbsp; .-> __end__;
+	human_in_loop -. &nbsp;continue&nbsp; .-> conversational_handler;
+	recon_executor --> result_interpreter;
+	result_interpreter --> strategy_advisor;
+	strategy_advisor --> human_in_loop;
+	classDef default fill:,line-height:1.2
+	classDef first fill-opacity:0
+	classDef last fill:
+```
 
 ## MCP Tools
 
