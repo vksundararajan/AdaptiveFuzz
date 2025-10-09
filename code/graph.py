@@ -1,6 +1,7 @@
-from typing import Any, Dict
+from typing import Any, Dict, List
 from langgraph.graph import StateGraph, START, END
 from langgraph.checkpoint.memory import InMemorySaver
+from langgraph.prebuilt import ToolNode, tools_condition
 
 from state import AdaptiveState
 from routes import route_from_human, route_from_conversational_handler
@@ -17,9 +18,11 @@ from consts import (
     RESULT_INTERPRETER,
     STRATEGY_ADVISOR,
     HUMAN_IN_LOOP,
+    RECON_TOOLS,
+    ANALYSIS_TOOLS,
 )
 
-def build_adaptive_graph(config: Dict[str, Any]) -> StateGraph:
+def build_adaptive_graph(config: Dict[str, Any], all_tools: List) -> StateGraph:
     """
     Build the AdaptiveFuzz graph.
     """
@@ -63,6 +66,17 @@ def build_adaptive_graph(config: Dict[str, Any]) -> StateGraph:
             "stop": END,
         },
     )
+
+    ### MCP Tools Integration
+    recon_tools, analysis_tools = all_tools
+
+    graph.add_node(RECON_TOOLS, ToolNode(recon_tools))
+    graph.add_conditional_edges(RECON_EXECUTOR, tools_condition, {"tools": RECON_TOOLS})
+    graph.add_edge(RECON_TOOLS, RECON_EXECUTOR)
+    
+    graph.add_node(ANALYSIS_TOOLS, ToolNode(analysis_tools))
+    graph.add_conditional_edges(RESULT_INTERPRETER, tools_condition, {"tools": ANALYSIS_TOOLS})
+    graph.add_edge(ANALYSIS_TOOLS, RESULT_INTERPRETER)
 
     checkpointer = InMemorySaver()
     return graph.compile(checkpointer=checkpointer)

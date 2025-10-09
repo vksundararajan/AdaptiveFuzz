@@ -150,7 +150,7 @@ def register_tools(mcp):
 
 
 if __name__ == "__main__":
-    mcp = FastMCP("Search Exploits Tools")
+    mcp = FastMCP("Interpreter Tools")
     register_tools(mcp)
 
     mcp.run(transport="stdio")

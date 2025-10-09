@@ -7,3 +7,4 @@ OUTPUT_DIR = os.path.join(ROOT_DIR, "outputs")
 
 PROMPTS_CONFIG_PATH = os.path.join(CODE_DIR, "config", "prompts.yaml")
 AI_RESPONSE_PATH = os.path.join(CODE_DIR, "config", "ai_responses.yaml")
+CMD_CONFIG_PATH = os.path.join(CODE_DIR, "config", "commands.yaml")

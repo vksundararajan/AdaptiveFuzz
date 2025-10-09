@@ -40,13 +40,5 @@ ALLOWED_MODELS = [
 
 
 # MCP Tools
-TOOLS = [
-    "secure_executor",
-    "get_executor_history",
-    "get_allowed_commands",
-    "make_http_request",
-    "check_security_headers",
-    "search_exploitdb",
-    "detect_technologies",
-    "lookup_cve"
-]
+RECON_TOOLS = "recon_tools"
+ANALYSIS_TOOLS = "analysis_tools"

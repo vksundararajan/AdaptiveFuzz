@@ -1,17 +1,19 @@
 from __future__ import annotations
 
+import asyncio
 from pprint import pprint
 from typing import Any, Dict
 import uuid
 
 from langgraph.types import Command
+from langchain_mcp_adapters.client import MultiServerMCPClient
 
 from consts import (
-	CONVERSATIONAL_HANDLER,
-	RECON_EXECUTOR,
-	RESULT_INTERPRETER,
-	STRATEGY_ADVISOR,
 	ADAPTIVE_SYSTEM,
+    CONVERSATIONAL_HANDLER,
+    RECON_EXECUTOR,
+    RESULT_INTERPRETER,
+    STRATEGY_ADVISOR,
 )
 from graph import build_adaptive_graph
 from paths import PROMPTS_CONFIG_PATH
@@ -20,17 +22,41 @@ from to_help import load_yaml_file, save_graph_visualization
 from to_prompt import c_prompt
 
 
-def run_adaptivefuzz(target_ip: str, user_query: str) -> Dict[str, Any]:
+async def run_adaptivefuzz(target_ip: str, user_query: str) -> Dict[str, Any]:
     """Run the AdaptiveFuzz LangGraph for the provided reconnaissance request."""
     config = load_yaml_file(PROMPTS_CONFIG_PATH)
     adaptive_config = config[ADAPTIVE_SYSTEM]
+	
+    ### Tools for recon
+    recon_tools = MultiServerMCPClient({
+        "http": {
+            "command": "python",
+            "args": ["code/tools/recon_tools.py"],
+            "transport": "stdio",
+        },
+    })
+    recon_tools = await recon_tools.get_tools()
 
-    graph = build_adaptive_graph(adaptive_config)
+    ### Tools for analysis
+    analysis_tools = MultiServerMCPClient({
+        "terminal": {
+            "command": "python",
+            "args": ["code/tools/analysis_tools.py"],
+            "transport": "stdio",
+        },
+    })    
+    analysis_tools = await analysis_tools.get_tools()
+    
+    graph = build_adaptive_graph(adaptive_config, [
+        recon_tools, 
+        analysis_tools
+    ])
+    
     # saved_path = save_graph_visualization(graph)
     # print(f"➡️  Graph visualisation saved to: {saved_path}")
 
     fuzz_id = str(uuid.uuid4())
-
+    
     initial_state = initialize_adaptive_state(
         fuzz_id=fuzz_id,
         target_ip=target_ip,
@@ -69,7 +95,7 @@ def main() -> None:
 	user_query = c_prompt("Fuzzer⫸ ")
 	print("\n")
 
-	final_state = run_adaptivefuzz(target_ip, user_query)
+	asyncio.run(run_adaptivefuzz(target_ip, user_query))
 
 if __name__ == "__main__":
 	main()
