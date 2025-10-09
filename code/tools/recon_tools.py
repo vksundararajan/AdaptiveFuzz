@@ -2,6 +2,7 @@ import subprocess
 import json
 import re
 from typing import List, Dict
+import requests
 
 import sys, os
 sys.path.append(os.path.dirname(os.path.dirname(__file__))) 
@@ -119,7 +120,7 @@ def register_tools(mcp):
         return _executor.get_history()
     
     @mcp.tool()
-    def get_allowed_commands() -> str:
+    def get_security_tools() -> str:
         """
         Returns the whitelist of approved commands for pentesting from the configuration file. Includes both 
         system commands (ls, cat, grep, etc.) and pentesting tools (nmap, nikto, dirb, etc.). Reference this 

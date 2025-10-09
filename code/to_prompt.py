@@ -1,13 +1,16 @@
+import json
+from langchain_core.messages import AIMessage, HumanMessage, SystemMessage
 from typing import Any, Dict, Sequence, List
 
 from paths import PROMPTS_CONFIG_PATH
 from to_help import load_yaml_file
 
 
+
 PROMPTS_CONFIG: Dict[str, Any] = load_yaml_file(PROMPTS_CONFIG_PATH)
 
 
-def ai_prompt(agent: str) -> str:
+def s_prompt(agent: str) -> str:
     """Construct a system prompt string for the given agent key defined in prompts.yaml."""
 
     agent_entry = PROMPTS_CONFIG["adaptive_system"]["agents"][agent]
@@ -16,6 +19,7 @@ def ai_prompt(agent: str) -> str:
 
     section_order = (
         ("role", "Role"),
+        ("tools", "Tools"),
         ("context", "Context"),
         ("instruction", "Instruction"),
         ("rules", "Rules"),
@@ -33,7 +37,18 @@ def ai_prompt(agent: str) -> str:
         value = raw_config.pop(key)
         if value is None:
             continue
-        formatted = value.strip() if isinstance(value, str) else str(value)
+        if key == "tools" and isinstance(value, dict):
+            if not value.get("mcp_access"):
+                formatted = "MCP Access: No"
+            else:
+                tool_list = value.get("available_tools", [])
+                if not tool_list:
+                    formatted = "MCP Access: Yes\nAvailable Tools: None"
+                else:
+                    tool_strings = [f"- {tool['name']}: {tool['description']}" for tool in tool_list]
+                    formatted = "MCP Access: Yes\nAvailable Tools:\n" + "\n".join(tool_strings)
+        else:
+            formatted = value.strip() if isinstance(value, str) else str(value)
         if formatted:
             parts.append(f"{label}:\n{formatted}")
 
@@ -110,3 +125,17 @@ def h_response(
     response_parts.append("\n🔀  What do we do next?")
 
     return "\n".join(response_parts)
+
+
+def b_message(*sources):
+    """Normalize mixed lists of messages and data into valid LangChain Message objects."""
+    messages = []
+    for src in sources:
+        for m in src or []:
+            if isinstance(m, (AIMessage, HumanMessage, SystemMessage)):
+                messages.append(m)
+            elif isinstance(m, str):
+                messages.append(SystemMessage(content=m))
+            else:
+                messages.append(SystemMessage(content=json.dumps(m)))
+    return messages

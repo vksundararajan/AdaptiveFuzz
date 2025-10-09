@@ -27,14 +27,15 @@ def build_adaptive_graph(config: Dict[str, Any], all_tools: List) -> StateGraph:
     Build the AdaptiveFuzz graph.
     """
     graph = StateGraph(AdaptiveState)
+    recon_tools, analysis_tools = all_tools
 
     conversational_handler_node = make_ch_node(llm_model=config["agents"][CONVERSATIONAL_HANDLER]["llm"])
     graph.add_node(CONVERSATIONAL_HANDLER, conversational_handler_node)
 
-    recon_executor_node = make_re_node(llm_model=config["agents"][RECON_EXECUTOR]["llm"])
+    recon_executor_node = make_re_node(llm_model=config["agents"][RECON_EXECUTOR]["llm"], tools=recon_tools)
     graph.add_node(RECON_EXECUTOR, recon_executor_node)
 
-    result_interpreter_node = make_ri_node(llm_model=config["agents"][RESULT_INTERPRETER]["llm"])
+    result_interpreter_node = make_ri_node(llm_model=config["agents"][RESULT_INTERPRETER]["llm"], tools=analysis_tools)
     graph.add_node(RESULT_INTERPRETER, result_interpreter_node)
 
     strategy_advisor_node = make_sa_node(llm_model=config["agents"][STRATEGY_ADVISOR]["llm"])
@@ -68,8 +69,6 @@ def build_adaptive_graph(config: Dict[str, Any], all_tools: List) -> StateGraph:
     )
 
     ### MCP Tools Integration
-    recon_tools, analysis_tools = all_tools
-
     graph.add_node(RECON_TOOLS, ToolNode(recon_tools))
     graph.add_conditional_edges(RECON_EXECUTOR, tools_condition, {"tools": RECON_TOOLS})
     graph.add_edge(RECON_TOOLS, RECON_EXECUTOR)
@@ -78,5 +77,6 @@ def build_adaptive_graph(config: Dict[str, Any], all_tools: List) -> StateGraph:
     graph.add_conditional_edges(RESULT_INTERPRETER, tools_condition, {"tools": ANALYSIS_TOOLS})
     graph.add_edge(ANALYSIS_TOOLS, RESULT_INTERPRETER)
 
+    ### Checkpointer for human loop
     checkpointer = InMemorySaver()
     return graph.compile(checkpointer=checkpointer)

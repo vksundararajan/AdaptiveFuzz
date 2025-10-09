@@ -88,7 +88,7 @@ def register_tools(mcp):
             return f"❌ Error: {str(e)}"
     
     @mcp.tool()
-    def detect_technologies(url: str, headers_only: bool = False) -> str:
+    def detect_web_technologies(url: str, headers_only: bool = False) -> str:
         """
         Fingerprints web technologies, frameworks, and libraries used by a target website. Analyzes HTTP headers 
         and page content to identify technologies like web servers, CMS platforms, JavaScript frameworks, and more. 

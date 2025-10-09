@@ -2,7 +2,7 @@ from typing import Any, Dict, List, Optional, TypedDict
 from langchain_core.messages import SystemMessage, HumanMessage
 from langgraph.graph.message import AnyMessage, add_messages
 from typing_extensions import Annotated
-from to_prompt import ai_prompt
+from to_prompt import s_prompt
 
 
 class AdaptiveState(TypedDict):
@@ -44,10 +44,10 @@ def initialize_adaptive_state(
 ) -> AdaptiveState:
     """Initialize a compact reconnaissance-oriented AdaptiveState."""
 
-    ch_msgs: List[AnyMessage] = [SystemMessage(ai_prompt(conversational_handler))]
-    re_msgs: List[AnyMessage] = [SystemMessage(ai_prompt(recon_executor))]
-    ri_msgs: List[AnyMessage] = [SystemMessage(ai_prompt(result_interpreter))]
-    sa_msgs: List[AnyMessage] = [SystemMessage(ai_prompt(strategy_advisor))]
+    ch_msgs: List[AnyMessage] = [SystemMessage(s_prompt(conversational_handler))]
+    re_msgs: List[AnyMessage] = [SystemMessage(s_prompt(recon_executor))]
+    ri_msgs: List[AnyMessage] = [SystemMessage(s_prompt(result_interpreter))]
+    sa_msgs: List[AnyMessage] = [SystemMessage(s_prompt(strategy_advisor))]
     hi_msgs: List[AnyMessage] = [HumanMessage(user_query)]
 
     return AdaptiveState(
