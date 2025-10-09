@@ -35,6 +35,7 @@ USER_QUERY = "user_query"
 ALLOWED_MODELS = [
     "gemini-2.5-pro",
     "gemini-2.5-flash",
+    "openai/gpt-oss-120b"
 ]
 
 

@@ -6,7 +6,7 @@ adaptive_system:
 
   agents:
     conversational_handler:
-      llm: gemini-2.5-flash
+      llm: openai/gpt-oss-120b
       prompt_config:
         role: "Reconnaissance Task Planner"
         instruction: |
@@ -37,7 +37,7 @@ adaptive_system:
 
 
     recon_executor:
-      llm: gemini-2.5-flash
+      llm: openai/gpt-oss-120b
       prompt_config:
         role: "Reconnaissance Task Executor"
         instruction: |
@@ -61,7 +61,7 @@ adaptive_system:
 
 
     result_interpreter:
-      llm: gemini-2.5-flash
+      llm: openai/gpt-oss-120b
       prompt_config:
         role: "Reconnaissance Findings Interpreter"
         instruction: |
@@ -85,7 +85,7 @@ adaptive_system:
 
 
     strategy_advisor:
-      llm: gemini-2.5-flash
+      llm: openai/gpt-oss-120b
       prompt_config:
         role: "Exploitation Strategy Advisor"
         instruction: |
@@ -109,7 +109,7 @@ adaptive_system:
 
 
     human_in_loop:
-      llm: gemini-2.5-flash
+      llm: openai/gpt-oss-120b
       prompt_config:
         role: "Human Interaction Coordinator"
         instruction: |

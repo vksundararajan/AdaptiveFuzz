@@ -32,6 +32,8 @@ from consts import (
     HUMAN_IN_LOOP,
 )
 
+from schemata import response_t
+
 from to_help import (
     get_llm,
     update_ts
@@ -48,7 +50,9 @@ def make_ch_node(llm_model: str) -> Callable[[Dict[str, Any]], Dict[str, Any]]:
             + list(state[HUMAN_IN_LOOP_MESSAGES])
         )
 
-        response_content = llm.invoke(messages)
+        ai_response = llm.with_structured_output(response_t[CONVERSATIONAL_HANDLER]).invoke(messages)
+        print(ai_response)
+        response_content = ai_response
         try:
             data = json.loads(response_content)
         except json.JSONDecodeError:
@@ -57,7 +61,7 @@ def make_ch_node(llm_model: str) -> Callable[[Dict[str, Any]], Dict[str, Any]]:
         next_messages = list(state[CONVERSATIONAL_HANDLER_MESSAGES])
         next_messages.append(AIMessage(content=response_content))
 
-        print("✅️  Conversational Handler")
+        print("🅰  Conversational Handler")
 
         return {
             TO_LOOP: False,
@@ -80,7 +84,8 @@ def make_re_node(llm_model: str) -> Callable[[Dict[str, Any]], Dict[str, Any]]:
             list(state[RECON_EXECUTOR_MESSAGES])
             + list(state[PENDING_TASKS])
         )
-        response_content = llm.invoke(messages)
+        ai_response = llm.with_structured_output(response_t[RECON_EXECUTOR]).invoke(messages)
+        response_content = ai_response
 
         try:
             data = json.loads(response_content)
@@ -95,7 +100,7 @@ def make_re_node(llm_model: str) -> Callable[[Dict[str, Any]], Dict[str, Any]]:
         next_messages = list(state[RECON_EXECUTOR_MESSAGES])
         next_messages.append(AIMessage(content=response_content))
 
-        print("✅️  Recon Executor")
+        print("🅰  Recon Executor")
 
         return {
             PENDING_TASKS: pending_tasks,
@@ -120,7 +125,8 @@ def make_ri_node(llm_model: str) -> Callable[[Dict[str, Any]], Dict[str, Any]]:
             + list(state[COMPLETED_TASKS])
             + list(state[PENDING_TASKS])
         )
-        response_content = llm.invoke(messages)
+        ai_response = llm.with_structured_output(response_t[RESULT_INTERPRETER]).invoke(messages)
+        response_content = ai_response
 
         try:
             data = json.loads(response_content)
@@ -130,7 +136,7 @@ def make_ri_node(llm_model: str) -> Callable[[Dict[str, Any]], Dict[str, Any]]:
         next_messages = list(state[RESULT_INTERPRETER_MESSAGES])
         next_messages.append(AIMessage(content=response_content))
 
-        print("✅️  Result Interpreter")
+        print("🅰  Result Interpreter")
 
         return {
             FINDINGS: data.get("findings", state[FINDINGS]),
@@ -154,7 +160,8 @@ def make_sa_node(llm_model: str) -> Callable[[Dict[str, Any]], Dict[str, Any]]:
             + list(state[COMPLETED_TASKS])
             + list(state[PENDING_TASKS])
         )
-        response_content = llm.invoke(messages)
+        ai_response = llm.with_structured_output(response_t[STRATEGY_ADVISOR]).invoke(messages)
+        response_content = ai_response
 
         try:
             data = json.loads(response_content)
@@ -164,7 +171,7 @@ def make_sa_node(llm_model: str) -> Callable[[Dict[str, Any]], Dict[str, Any]]:
         next_messages = list(state[STRATEGY_ADVISOR_MESSAGES])
         next_messages.append(AIMessage(content=response_content))
 
-        print("✅️  Strategy Advisor")
+        print("🅰  Strategy Advisor")
 
         return {
             STRATEGIES: data.get("strategies", state[STRATEGIES]),
@@ -188,7 +195,7 @@ def make_hr_node(llm_model: str) -> Callable[[Dict[str, Any]], Dict[str, Any]]:
 
         human_message = None
         val = from_human.get("human_reply")
-        human_message = val.strip()
+        human_message = val
 
         messages = list(state.get(HUMAN_IN_LOOP_MESSAGES, []))
         messages.append(HumanMessage(content=human_message))

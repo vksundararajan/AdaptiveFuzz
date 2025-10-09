@@ -11,6 +11,8 @@ from langchain_google_genai import ChatGoogleGenerativeAI
 from consts import ALLOWED_MODELS
 from paths import OUTPUT_DIR, AI_RESPONSE_PATH
 
+from langchain_groq import ChatGroq
+
 
 def get_llm(llm_model: str):
     """
@@ -27,9 +29,13 @@ def get_llm(llm_model: str):
     """
     if llm_model in ALLOWED_MODELS:
         load_dotenv()
+
+        api_key = os.getenv("GROQ_API_KEY")
+        return ChatGroq(model=llm_model, temperature=0.2, api_key=api_key)
         
-        api_key = os.getenv("GOOGLE_API_KEY")
-        return ChatGoogleGenerativeAI(model=llm_model, temperature=0.2, api_key=api_key)
+        # For Gemini
+        # api_key = os.getenv("GOOGLE_API_KEY")
+        # return ChatGoogleGenerativeAI(model=llm_model, temperature=0.2, api_key=api_key)
     else:
         raise ValueError(
             f"Invalid model '{llm_model}'. "
