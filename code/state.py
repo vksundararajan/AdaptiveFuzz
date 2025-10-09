@@ -1,5 +1,5 @@
 from typing import Any, Dict, List, Optional, TypedDict
-from langchain_core.messages import SystemMessage
+from langchain_core.messages import SystemMessage, HumanMessage
 from langgraph.graph.message import AnyMessage, add_messages
 from typing_extensions import Annotated
 from to_prompt import make_prompt
@@ -32,7 +32,7 @@ class AdaptiveState(TypedDict):
 def initialize_adaptive_state(
     fuzz_id: str,
     target_ip: str,
-    human_in_loop_prompt: str,
+    user_query: str,
     conversational_handler: str,
     recon_executor: str,
     result_interpreter: str,
@@ -46,7 +46,7 @@ def initialize_adaptive_state(
     re_msgs: List[AnyMessage] = [SystemMessage(make_prompt(recon_executor))]
     ri_msgs: List[AnyMessage] = [SystemMessage(make_prompt(result_interpreter))]
     sa_msgs: List[AnyMessage] = [SystemMessage(make_prompt(strategy_advisor))]
-    hi_msgs: List[AnyMessage] = [SystemMessage(make_prompt(human_in_loop_prompt))]
+    hi_msgs: List[AnyMessage] = [HumanMessage(user_query)]
 
     return AdaptiveState(
         conversational_handler_messages=ch_msgs,

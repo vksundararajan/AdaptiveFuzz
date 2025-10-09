@@ -45,7 +45,7 @@ def run_adaptivefuzz(target_ip: str, user_query: str) -> Dict[str, Any]:
 	initial_state = initialize_adaptive_state(
 		fuzz_id=fuzz_id,
 		target_ip=target_ip,
-		human_in_loop=user_query,
+		user_query=user_query,
 		conversational_handler=CONVERSATIONAL_HANDLER,
 		recon_executor=RECON_EXECUTOR,
 		result_interpreter=RESULT_INTERPRETER,
@@ -66,7 +66,7 @@ def main() -> None:
 
 	target_ip = c_prompt("Target IP Address: ")
 	print("\n⚠️  Your assistant is coming online...")
-	user_query = c_prompt("Fuzzer⋙ ")
+	user_query = c_prompt("Fuzzer⫸ ")
 
 	final_state = run_adaptivefuzz(target_ip, user_query)
 
