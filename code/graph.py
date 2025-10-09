@@ -1,5 +1,6 @@
 from typing import Any, Dict
 from langgraph.graph import StateGraph, START, END
+from langgraph.checkpoint.memory import InMemorySaver
 
 from state import AdaptiveState
 from routes import route_from_human, route_from_conversational_handler
@@ -63,4 +64,5 @@ def build_adaptive_graph(config: Dict[str, Any]) -> StateGraph:
         },
     )
 
-    return graph.compile()
+    checkpointer = InMemorySaver()
+    return graph.compile(checkpointer=checkpointer)

@@ -2,7 +2,7 @@ from typing import Any, Dict, List, Optional, TypedDict
 from langchain_core.messages import SystemMessage, HumanMessage
 from langgraph.graph.message import AnyMessage, add_messages
 from typing_extensions import Annotated
-from to_prompt import make_prompt
+from to_prompt import ai_prompt
 
 
 class AdaptiveState(TypedDict):
@@ -18,9 +18,11 @@ class AdaptiveState(TypedDict):
     ### AdaptiveFuzz State Keys --- added
     fuzz_id: str
     target_ip: str
+    user_query: str
     to_loop: bool
     is_inappropriate: bool
     pending_tasks: List[Dict[str, Any]]
+    completed_tasks: List[Dict[str, Any]]
     executed_commands: List[Dict[str, Any]]
     findings: List[Dict[str, Any]]
     policy: Optional[Dict[str, Any]]
@@ -42,10 +44,10 @@ def initialize_adaptive_state(
 ) -> AdaptiveState:
     """Initialize a compact reconnaissance-oriented AdaptiveState."""
 
-    ch_msgs: List[AnyMessage] = [SystemMessage(make_prompt(conversational_handler))]
-    re_msgs: List[AnyMessage] = [SystemMessage(make_prompt(recon_executor))]
-    ri_msgs: List[AnyMessage] = [SystemMessage(make_prompt(result_interpreter))]
-    sa_msgs: List[AnyMessage] = [SystemMessage(make_prompt(strategy_advisor))]
+    ch_msgs: List[AnyMessage] = [SystemMessage(ai_prompt(conversational_handler))]
+    re_msgs: List[AnyMessage] = [SystemMessage(ai_prompt(recon_executor))]
+    ri_msgs: List[AnyMessage] = [SystemMessage(ai_prompt(result_interpreter))]
+    sa_msgs: List[AnyMessage] = [SystemMessage(ai_prompt(strategy_advisor))]
     hi_msgs: List[AnyMessage] = [HumanMessage(user_query)]
 
     return AdaptiveState(
@@ -56,7 +58,9 @@ def initialize_adaptive_state(
         human_in_loop_messages=hi_msgs,
         fuzz_id=fuzz_id,
         target_ip=target_ip,
+        user_query=user_query,
         pending_tasks=[],
+        completed_tasks=[],
         executed_commands=[],
         findings=[],
         policy=None,

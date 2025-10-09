@@ -27,6 +27,8 @@ LAST_UPDATE_TS = "last_update_ts"
 TO_LOOP = "to_loop"
 STRATEGIES = "strategies"
 IS_INAPPROPRIATE = "is_inappropriate"
+COMPLETED_TASKS = "completed_tasks"
+USER_QUERY = "user_query"
 
 
 # Allowed LLM models

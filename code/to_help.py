@@ -1,13 +1,15 @@
+import json
 import os
-from typing import Any, Dict
-
 import yaml
+from datetime import datetime
+from typing import Any, Dict
+from dotenv import load_dotenv
 from langgraph.graph import StateGraph
 from langchain_core.runnables.graph import MermaidDrawMethod
 from langchain_google_genai import ChatGoogleGenerativeAI
 
 from consts import ALLOWED_MODELS
-from paths import OUTPUT_DIR
+from paths import OUTPUT_DIR, AI_RESPONSE_PATH
 
 
 def get_llm(llm_model: str):
@@ -24,7 +26,33 @@ def get_llm(llm_model: str):
         ValueError: If model name is not in the approved whitelist
     """
     if llm_model in ALLOWED_MODELS:
-        return ChatGoogleGenerativeAI(model=llm_model, temperature=0.2)
+        load_dotenv()
+        
+        api_key = os.getenv("GOOGLE_API_KEY")
+        return ChatGoogleGenerativeAI(model=llm_model, temperature=0.2, api_key=api_key)
+    else:
+        raise ValueError(
+            f"Invalid model '{llm_model}'. "
+            f"Allowed Gemini models: {sorted(ALLOWED_MODELS)}"
+        )
+
+
+def get_fake_llm(llm_model: str):
+    """
+    Fake AI Response.
+    """
+    if llm_model in ALLOWED_MODELS:
+        responses = load_yaml_file(AI_RESPONSE_PATH).get("ai_response", {})
+
+        class _StaticLLM:
+            def __init__(self, data: Dict[str, Any]) -> None:
+                self._data = data
+
+            def invoke(self, _messages, agent: str, **_kwargs):
+                content = self._data.get(agent, {})
+                return json.dumps(content, ensure_ascii=False)
+
+        return _StaticLLM(responses)
     else:
         raise ValueError(
             f"Invalid model '{llm_model}'. "
@@ -86,3 +114,12 @@ def save_graph_visualization(
             return png_path
         except Exception:
             return None
+
+
+def update_ts() -> Dict[str, str]:
+    """Return the current date and time as a lightweight dict."""
+
+    now = datetime.now()
+    date = now.strftime("%m/%d/%Y")
+    time = now.strftime("%-I:%M %p")
+    return {"date": date, "time": time}

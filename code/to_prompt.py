@@ -1,13 +1,13 @@
-from typing import Any, Dict, Sequence
+from typing import Any, Dict, Sequence, List
 
 from paths import PROMPTS_CONFIG_PATH
-from to_support import load_yaml_file
+from to_help import load_yaml_file
 
 
 PROMPTS_CONFIG: Dict[str, Any] = load_yaml_file(PROMPTS_CONFIG_PATH)
 
 
-def make_prompt(agent: str) -> str:
+def ai_prompt(agent: str) -> str:
     """Construct a system prompt string for the given agent key defined in prompts.yaml."""
 
     agent_entry = PROMPTS_CONFIG["adaptive_system"]["agents"][agent]
@@ -59,10 +59,54 @@ def c_prompt(
         try:
             value = input(prompt_text).strip()
         except KeyboardInterrupt: 
-            print("\n⚠️ Aborted by user.")
+            print("\n⚠️  Aborted by user.")
             raise SystemExit(1)
 
         if value:
             return value
 
-    print(f"{empty_warning}\n")
+
+def h_response(
+    findings: List[Dict[str, Any]],
+    completed_tasks: List[Dict[str, str]],
+    pending_tasks: List[Dict[str, str]],
+    strategies: List[str],
+) -> str:
+    """Formats the current state of the fuzzer into a human-readable string."""
+    response_parts = ["\nFuzzer Status Update", "--------------------"]
+
+    if strategies:
+        response_parts.append("\nStrategies:")
+        for strategy in strategies:
+            response_parts.append(f"- {strategy}")
+
+    if findings:
+        response_parts.append("\nFindings:")
+        for finding in findings:
+            if "summary" in finding:
+                response_parts.append(f"- Summary: {finding['summary']}")
+            if "details" in finding and finding["details"]:
+                response_parts.append("  Details:")
+                for detail_item in finding["details"]:
+                    for detail_value in detail_item.values():
+                        response_parts.append(f"  - {detail_value}")
+
+    if completed_tasks:
+        response_parts.append("\nCompleted Tasks:")
+        for task in completed_tasks:
+            task_id = task.get("task_id", "N/A")
+            description = task.get("description", "No description")
+            status = task.get("status", "unknown")
+            response_parts.append(f"- ({task_id}) {description} - {status}")
+
+    if pending_tasks:
+        response_parts.append("\nPending Tasks:")
+        for task in pending_tasks:
+            task_id = task.get("task_id", "N/A")
+            description = task.get("description", "No description")
+            status = task.get("status", "pending")
+            response_parts.append(f"- ({task_id}) {description} - {status}")
+    
+    response_parts.append("\n🔀  What do we do next?")
+
+    return "\n".join(response_parts)

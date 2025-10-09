@@ -3,7 +3,7 @@ import json
 import re
 from typing import List, Dict
 from paths import COMMANDS_CONFIG_PATH
-from to_support import load_yaml_file
+from to_help import load_yaml_file
 
 
 class TerminalExecutor:
