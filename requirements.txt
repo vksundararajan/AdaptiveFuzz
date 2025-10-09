@@ -1,6 +1,8 @@
 langchain-google-genai
 langchain-core
 langgraph
+fastmcp
+langchain-mcp-adapters
 pyyaml
 requests
 webtech

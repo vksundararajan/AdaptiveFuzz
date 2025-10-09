@@ -3,6 +3,7 @@ import json
 from typing import Dict, Optional
 from paths import COMMANDS_CONFIG_PATH
 from to_help import load_yaml_file
+from mcp.server.fastmcp import FastMCP
 
 
 def register_tools(mcp):
@@ -92,3 +93,10 @@ def register_tools(mcp):
             result.append(f"⚠️ X-Powered-By header disclosed: {response.headers.get('X-Powered-By')}")
         
         return "\n".join(result)
+
+
+if __name__ == "__main__":
+    mcp = FastMCP("HTTP Tools")
+    register_tools(mcp)
+
+    mcp.run(transport="stdio")

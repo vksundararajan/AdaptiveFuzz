@@ -4,7 +4,7 @@ import re
 from typing import List, Dict
 from paths import COMMANDS_CONFIG_PATH
 from to_help import load_yaml_file
-
+from mcp.server.fastmcp import FastMCP
 
 class TerminalExecutor:
     """Simple terminal executor with command history"""
@@ -131,3 +131,9 @@ def register_tools(mcp):
             "note": "These are whitelisted commands for pentesting operations"
         }, indent=2)
 
+
+if __name__ == "__main__":
+    mcp = FastMCP("Terminal Tools")
+    register_tools(mcp)
+
+    mcp.run(transport="stdio")
