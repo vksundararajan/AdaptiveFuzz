@@ -3,7 +3,7 @@ from typing import Any, Callable, Dict
 from state import AdaptiveState
 from langchain_core.messages import AIMessage, HumanMessage
 from langgraph.types import interrupt
-from to_prompt import h_response, b_message
+from to_prompt import h_response, b_message, show_state
 
 from consts import (
     CONVERSATIONAL_HANDLER_MESSAGES,
@@ -55,10 +55,12 @@ def make_ch_node(llm_model: str) -> Callable[[Dict[str, Any]], Dict[str, Any]]:
         next_messages.append(AIMessage(content=json.dumps(ai_response)))
 
         print("🅰  Conversational Handler")
+        print(show_state(state))
 
         return {
             TO_LOOP: False,
             STRATEGIES: [],
+            CYCLE: state.get(CYCLE, 0) + 1,
             PENDING_TASKS: ai_response.get("pending_tasks", state[PENDING_TASKS]),
             IS_INAPPROPRIATE: ai_response.get("is_inappropriate", state[IS_INAPPROPRIATE]),
             CONVERSATIONAL_HANDLER_MESSAGES: next_messages,
@@ -74,6 +76,7 @@ def make_re_node(llm_model: str, tools: list) -> Callable[[Dict[str, Any]], Dict
 
     def recon_executor_node(state: AdaptiveState) -> Dict[str, Any]:
         """Execute tasks using MCP tools and record results (stub)."""
+        print(show_state(state))
         messages = b_message(
             list(state[RECON_EXECUTOR_MESSAGES])
             + list(state[PENDING_TASKS])
@@ -179,7 +182,6 @@ def make_hr_node(llm_model: str) -> Callable[[Dict[str, Any]], Dict[str, Any]]:
 
         return {
             TO_LOOP: True,
-            CYCLE: state.get(CYCLE, 0) + 1,
             FUZZ_ID: state.get(FUZZ_ID),
             USER_QUERY: human_message or state.get(USER_QUERY),
             HUMAN_IN_LOOP_MESSAGES: messages,
