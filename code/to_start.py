@@ -69,7 +69,7 @@ async def run_adaptivefuzz(target_ip: str, user_query: str) -> Dict[str, Any]:
     )
 
     thread_config = {"configurable": {"thread_id": fuzz_id}}
-    state = graph.invoke(initial_state, config=thread_config)
+    state = await graph.ainvoke(initial_state, config=thread_config)
 
     while True:
         interrupt = state.get("__interrupt__")
@@ -79,7 +79,7 @@ async def run_adaptivefuzz(target_ip: str, user_query: str) -> Dict[str, Any]:
         print("\n⚠️  Your assistant is coming online...")
         print(interrupt[0].value)
         human_reply = input("Fuzzer⫸ ").strip()
-        state = graph.invoke(Command(resume={"human_reply": human_reply}), config=thread_config)
+        state = await graph.ainvoke(Command(resume={"human_reply": human_reply}), config=thread_config)
 
 
 
@@ -90,10 +90,14 @@ def main() -> None:
 	print("📌  AdaptiveFuzz")
 	print("=" * 80)
 	print("\n")
-
-	target_ip = c_prompt("Target IP Address: ")
+	target_ip = "8.8.8.8"	
 	print("\n⚠️  Your assistant is coming online...")
-	user_query = c_prompt("Fuzzer⫸ ")
+	print("Fuzzer⫸ check this ip address is pingable")
+	user_query = "check this ip address is pingable"
+	
+	# target_ip = c_prompt("Target IP Address: ")
+	# print("\n⚠️  Your assistant is coming online...")
+	# user_query = c_prompt("Fuzzer⫸ ")
 	print("\n")
 
 	asyncio.run(run_adaptivefuzz(target_ip, user_query))

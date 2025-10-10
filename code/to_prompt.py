@@ -141,65 +141,24 @@ def b_message(*sources):
     return messages
 
 
-def show_state(state: Dict[str, Any]) -> str:
+def _s_state(state: Dict[str, Any], title: str) -> str:
     """Formats and prints the current state of the fuzzer."""
     
-    def format_value(value: Any, indent: int = 0) -> str:
-        """Helper to format values recursively."""
-        prefix = "  " * indent
-        if isinstance(value, dict):
-            return "\n" + "\n".join(f"{prefix}- {k}: {format_value(v, indent + 1)}" for k, v in value.items())
-        if isinstance(value, list):
-            if not value:
-                return "[]"
-            return "\n" + "\n".join(f"{prefix}- {format_value(item, indent + 1)}" for item in value)
-        return str(value)
-
-    output = [
-        "--------------------",
-        "Fuzzer State Details",
-        "--------------------",
+    show = ""
+    show += "––––––––––––" + title + "––––––––––––\n"
+    
+    state_copy = state.copy()
+    message_keys = [
+        'conversational_handler_messages',
+        'recon_executor_messages',
+        'result_interpreter_messages',
+        'strategy_advisor_messages',
+        'human_in_loop_messages'
     ]
+    for key in message_keys:
+        if key in state_copy:
+            del state_copy[key]
     
-    # Prioritize key fields
-    priority_order = [
-        "fuzz_id", "target_ip", "user_query", "cycle", "last_update_ts", 
-        "is_inappropriate", "to_loop", "policy"
-    ]
+    show += json.dumps(state_copy, indent=2, default=str)
     
-    for key in priority_order:
-        if key in state:
-            output.append(f"{key.replace('_', ' ').title()}: {state[key]}")
-
-    # Handle complex list fields
-    list_fields = {
-        "pending_tasks": "Pending Tasks",
-        "completed_tasks": "Completed Tasks",
-        "executed_commands": "Executed Commands",
-        "findings": "Findings",
-        "strategies": "Strategies",
-    }
-    
-    for key, title in list_fields.items():
-        if state.get(key):
-            output.append(f"\n{title}:")
-            for item in state[key]:
-                output.append(format_value(item, indent=1))
-
-    # Handle message fields
-    message_fields = {
-        "conversational_handler_messages": "Conversational Handler Messages",
-        "recon_executor_messages": "Recon Executor Messages",
-        "result_interpreter_messages": "Result Interpreter Messages",
-        "strategy_advisor_messages": "Strategy Advisor Messages",
-        "human_in_loop_messages": "Human In Loop Messages",
-    }
-
-    output.append("\nMessage Logs:")
-    for key, title in message_fields.items():
-        if state.get(key):
-            count = len(state[key])
-            output.append(f"  - {title}: {count} message(s)")
-            
-    output.append("--------------------")
-    return "\n".join(output)
+    print(show + "\n")
