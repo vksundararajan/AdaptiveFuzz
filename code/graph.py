@@ -1,10 +1,15 @@
 from typing import Any, Dict, List
 from langgraph.graph import StateGraph, START, END
 from langgraph.checkpoint.memory import InMemorySaver
-from langgraph.prebuilt import ToolNode, tools_condition
+from langgraph.prebuilt import ToolNode
 
 from state import AdaptiveState
-from routes import route_from_human, route_from_conversational_handler
+from routes import (
+    route_from_human, 
+    route_from_conversational_handler,
+    route_recon_executor_tools,
+    route_result_interpreter_tools
+)
 from nodes import (
     make_ch_node,
     make_re_node,
@@ -20,6 +25,8 @@ from consts import (
     HUMAN_IN_LOOP,
     RECON_TOOLS,
     ANALYSIS_TOOLS,
+    RECON_EXECUTOR_MESSAGES,
+    RESULT_INTERPRETER_MESSAGES,
 )
 
 def build_adaptive_graph(config: Dict[str, Any], all_tools: List) -> StateGraph:
@@ -28,6 +35,25 @@ def build_adaptive_graph(config: Dict[str, Any], all_tools: List) -> StateGraph:
     """
     graph = StateGraph(AdaptiveState)
     recon_tools, analysis_tools = all_tools
+
+    # Create wrapper functions for ToolNodes that handle message field mapping
+    def recon_tools_node(state: AdaptiveState) -> Dict[str, Any]:
+        """Wrapper for recon tools that maps message fields correctly."""
+        # Create a temporary state with 'messages' field for ToolNode
+        temp_state = {"messages": state[RECON_EXECUTOR_MESSAGES]}
+        tool_node = ToolNode(recon_tools)
+        result = tool_node.invoke(temp_state)
+        # Return updates for the correct message field
+        return {RECON_EXECUTOR_MESSAGES: result["messages"]}
+    
+    def analysis_tools_node(state: AdaptiveState) -> Dict[str, Any]:
+        """Wrapper for analysis tools that maps message fields correctly."""
+        # Create a temporary state with 'messages' field for ToolNode
+        temp_state = {"messages": state[RESULT_INTERPRETER_MESSAGES]}
+        tool_node = ToolNode(analysis_tools)
+        result = tool_node.invoke(temp_state)
+        # Return updates for the correct message field
+        return {RESULT_INTERPRETER_MESSAGES: result["messages"]}
 
     conversational_handler_node = make_ch_node(llm_model=config["agents"][CONVERSATIONAL_HANDLER]["llm"])
     graph.add_node(CONVERSATIONAL_HANDLER, conversational_handler_node)
@@ -55,8 +81,29 @@ def build_adaptive_graph(config: Dict[str, Any], all_tools: List) -> StateGraph:
         },
     )
 
-    graph.add_edge(RECON_EXECUTOR, RESULT_INTERPRETER)
-    graph.add_edge(RESULT_INTERPRETER, STRATEGY_ADVISOR)
+    ### MCP Tools Integration
+    graph.add_node(RECON_TOOLS, recon_tools_node)
+    graph.add_conditional_edges(
+        RECON_EXECUTOR, 
+        route_recon_executor_tools, 
+        {
+            "tools": RECON_TOOLS,
+            "continue": RESULT_INTERPRETER
+        }
+    )
+    graph.add_edge(RECON_TOOLS, RECON_EXECUTOR)
+    
+    graph.add_node(ANALYSIS_TOOLS, analysis_tools_node)
+    graph.add_conditional_edges(
+        RESULT_INTERPRETER, 
+        route_result_interpreter_tools, 
+        {
+            "tools": ANALYSIS_TOOLS,
+            "continue": STRATEGY_ADVISOR
+        }
+    )
+    graph.add_edge(ANALYSIS_TOOLS, RESULT_INTERPRETER)
+
     graph.add_edge(STRATEGY_ADVISOR, HUMAN_IN_LOOP)
 
     graph.add_conditional_edges(
@@ -67,15 +114,6 @@ def build_adaptive_graph(config: Dict[str, Any], all_tools: List) -> StateGraph:
             "stop": END,
         },
     )
-
-    ### MCP Tools Integration
-    graph.add_node(RECON_TOOLS, ToolNode(recon_tools))
-    graph.add_conditional_edges(RECON_EXECUTOR, tools_condition, {"tools": RECON_TOOLS})
-    graph.add_edge(RECON_TOOLS, RECON_EXECUTOR)
-    
-    graph.add_node(ANALYSIS_TOOLS, ToolNode(analysis_tools))
-    graph.add_conditional_edges(RESULT_INTERPRETER, tools_condition, {"tools": ANALYSIS_TOOLS})
-    graph.add_edge(ANALYSIS_TOOLS, RESULT_INTERPRETER)
 
     ### Checkpointer for human loop
     checkpointer = InMemorySaver()

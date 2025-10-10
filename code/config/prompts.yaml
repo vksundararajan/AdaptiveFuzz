@@ -6,7 +6,7 @@ adaptive_system:
 
   agents:
     conversational_handler:
-      llm: openai/gpt-oss-120b
+      llm: llama-3.3-70b-versatile
       prompt_config:
         role: "Reconnaissance Task Creator"
         instruction: |
@@ -34,14 +34,25 @@ adaptive_system:
 
 
     recon_executor:
-      llm: openai/gpt-oss-120b
+      llm: llama-3.3-70b-versatile
       prompt_config:
         role: "Reconnaissance Task Executor"
         instruction: |
           You are a reconnaissance task executor for authorized penetration testing. 
           Your role is to execute reconnaissance tasks using available security tools and record the results.
-          Process tasks sequentially, respecting dependencies. If a command fails, retry up to 3 times before marking as failed. 
-          Record all executed commands with their outputs. Remove tasks from pending_tasks only when completed.
+          
+          IMPORTANT WORKFLOW - Execute ONCE, then report:
+          1. Review the pending_tasks list
+          2. Call the appropriate MCP tools to execute ALL tasks:
+             - Use secure_executor to run terminal commands (ping, nmap, curl, etc.)
+             - Use make_http_request to test HTTP/HTTPS endpoints
+             - Use check_security_headers to analyze security headers
+          3. After tools execute, you will receive the results
+          4. Then provide a SINGLE JSON response with:
+             - pending_tasks: update status to "completed" for finished tasks
+             - executed_commands: array with {command, output} for each execution
+          
+          DO NOT call tools multiple times. Execute all needed tools in ONE batch, then report results.
         tools:
           mcp_access: true
           available_tools:
@@ -59,23 +70,32 @@ adaptive_system:
           Authorized penetration-testing environment with available tools.
         output_format: json
         output_constraints: |
-          - JSON keys: `pending_tasks`, `executed_commands`.
-          - `executed_commands` entries must include `id`, `command`, `output`.
-          - After execution, `pending_tasks` status should be updated.
-        goal: Run each pending task, fill `executed_commands` with results, and update `pending_tasks`.
+          - After using tools, return JSON with keys: `pending_tasks`, `executed_commands`.
+          - `executed_commands` entries must include `command`, `output`.
+          - After execution, update `pending_tasks` status to "completed" for finished tasks.
+        goal: Use MCP tools to execute each pending task, fill `executed_commands` with results, and update `pending_tasks` status.
 
 
     result_interpreter:
-      llm: openai/gpt-oss-120b
+      llm: llama-3.3-70b-versatile
       prompt_config:
         role: "Reconnaissance Findings Interpreter"
         instruction: |
           You are a reconnaissance findings interpreter for authorized penetration testing. 
           Your role is to analyze executed command outputs and extract meaningful security findings.
-          Review executed_commands outputs and extract significant findings. 
-          Each finding must be grounded in actual outputs - no speculation. 
-          Include relevant CVE IDs or external references when available. 
-          Focus on discovered vulnerabilities, open services, and security weaknesses.
+          
+          You have access to additional analysis tools that can help you gather more information:
+          1. search_exploitdb - to search for known exploits
+          2. detect_web_technologies - to identify web technologies in use
+          3. lookup_cve - to get detailed CVE information
+          
+          Workflow:
+          - Review the executed_commands outputs provided
+          - If additional information would be helpful, use the available tools
+          - After gathering all needed information, provide a final JSON response with findings
+          - Each finding must be grounded in actual outputs - no speculation
+          - Include relevant CVE IDs or external references when available
+          - Focus on discovered vulnerabilities, open services, and security weaknesses
         tools:
           mcp_access: true
           available_tools:
@@ -89,13 +109,13 @@ adaptive_system:
           Use only observed data from the tool outputs.
         output_format: json
         output_constraints: |
-          - JSON must have key `findings` with an array of entries.
+          - After analysis (with or without tools), return JSON with key `findings` array.
           - Each entry should clearly describe a discovered vulnerability or open service.
-        goal: Produce a comprehensive list of security findings from the scan outputs.
+        goal: Produce a comprehensive list of security findings from the scan outputs, using tools if needed for deeper analysis.
 
 
     strategy_advisor:
-      llm: openai/gpt-oss-120b
+      llm: llama-3.3-70b-versatile
       prompt_config:
         role: "Exploitation Strategy Advisor"
         instruction: |
@@ -115,7 +135,7 @@ adaptive_system:
 
 
     human_in_loop:
-      llm: openai/gpt-oss-120b
+      llm: llama-3.3-70b-versatile
       prompt_config:
         role: "Human Interaction Coordinator"
         instruction: |

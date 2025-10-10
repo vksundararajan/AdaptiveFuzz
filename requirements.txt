@@ -1,7 +1,7 @@
 langchain-google-genai
 langchain-core
 langgraph
-fastmcp
+langchain-groq
 langchain-mcp-adapters
 pyyaml
 requests

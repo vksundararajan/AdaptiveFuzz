@@ -1,5 +1,5 @@
 import json
-from langchain_core.messages import AIMessage, HumanMessage, SystemMessage
+from langchain_core.messages import AIMessage, HumanMessage, SystemMessage, ToolMessage
 from typing import Any, Dict, Sequence, List
 
 from paths import PROMPTS_CONFIG_PATH
@@ -86,9 +86,21 @@ def h_response(
     completed_tasks: List[Dict[str, str]],
     pending_tasks: List[Dict[str, str]],
     strategies: List[str],
+    executed_commands: List[Dict[str, Any]] = None,
 ) -> str:
     """Formats the current state of the fuzzer into a human-readable string."""
     response_parts = ["\nFuzzer Status Update", "--------------------"]
+
+    if executed_commands:
+        response_parts.append("\nExecuted Commands:")
+        for cmd in executed_commands:
+            command = cmd.get("command", "N/A")
+            output = cmd.get("output", "No output")
+            # Truncate long outputs
+            if len(output) > 200:
+                output = output[:200] + "... (truncated)"
+            response_parts.append(f"- Command: {command}")
+            response_parts.append(f"  Output: {output}")
 
     if strategies:
         response_parts.append("\nStrategies:")
@@ -102,9 +114,17 @@ def h_response(
                 response_parts.append(f"- Summary: {finding['summary']}")
             if "details" in finding and finding["details"]:
                 response_parts.append("  Details:")
-                for detail_item in finding["details"]:
-                    for detail_value in detail_item.values():
-                        response_parts.append(f"  - {detail_value}")
+                # Handle details as either a dict or a list
+                if isinstance(finding["details"], dict):
+                    for key, value in finding["details"].items():
+                        response_parts.append(f"  - {key}: {value}")
+                elif isinstance(finding["details"], list):
+                    for detail_item in finding["details"]:
+                        if isinstance(detail_item, dict):
+                            for detail_value in detail_item.values():
+                                response_parts.append(f"  - {detail_value}")
+                        else:
+                            response_parts.append(f"  - {detail_item}")
 
     if completed_tasks:
         response_parts.append("\nCompleted Tasks:")
@@ -132,10 +152,74 @@ def b_message(*sources):
     messages = []
     for src in sources:
         for m in src or []:
-            if isinstance(m, (AIMessage, HumanMessage, SystemMessage)):
+            if isinstance(m, (AIMessage, HumanMessage, SystemMessage, ToolMessage)):
                 messages.append(m)
             elif isinstance(m, str):
                 messages.append(SystemMessage(content=m))
             else:
                 messages.append(SystemMessage(content=json.dumps(m)))
     return messages
+
+
+def show_state(state: Dict[str, Any]) -> str:
+    """Formats and prints the current state of the fuzzer."""
+
+    def format_value(value: Any, indent: int = 0) -> str:
+        """Helper to format values recursively."""
+        prefix = "  " * indent
+        if isinstance(value, dict):
+            return "\n" + "\n".join(f"{prefix}- {k}: {format_value(v, indent + 1)}" for k, v in value.items())
+        if isinstance(value, list):
+            if not value:
+                return "[]"
+            return "\n" + "\n".join(f"{prefix}- {format_value(item, indent + 1)}" for item in value)
+        return str(value)
+
+    output = [
+        "--------------------",
+        "Fuzzer State Details",
+        "--------------------",
+    ]
+
+    # Prioritize key fields
+    priority_order = [
+        "fuzz_id", "target_ip", "user_query", "cycle", "last_update_ts",
+        "is_inappropriate", "to_loop", "policy"
+    ]
+
+    for key in priority_order:
+        if key in state:
+            output.append(f"{key.replace('_', ' ').title()}: {state[key]}")
+
+    # Handle complex list fields
+    list_fields = {
+        "pending_tasks": "Pending Tasks",
+        "completed_tasks": "Completed Tasks",
+        "executed_commands": "Executed Commands",
+        "findings": "Findings",
+        "strategies": "Strategies",
+    }
+
+    for key, title in list_fields.items():
+        if state.get(key):
+            output.append(f"\n{title}:")
+            for item in state[key]:
+                output.append(format_value(item, indent=1))
+
+    # Handle message fields
+    message_fields = {
+        "conversational_handler_messages": "Conversational Handler Messages",
+        "recon_executor_messages": "Recon Executor Messages",
+        "result_interpreter_messages": "Result Interpreter Messages",
+        "strategy_advisor_messages": "Strategy Advisor Messages",
+        "human_in_loop_messages": "Human In Loop Messages",
+    }
+
+    output.append("\nMessage Logs:")
+    for key, title in message_fields.items():
+        if state.get(key):
+            count = len(state[key])
+            output.append(f"  - {title}: {count} message(s)")
+
+    output.append("--------------------")
+    return "\n".join(output)
