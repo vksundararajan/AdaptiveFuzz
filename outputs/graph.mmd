@@ -10,19 +10,13 @@ graph TD;
 	result_interpreter(result_interpreter)
 	strategy_advisor(strategy_advisor)
 	human_in_loop(human_in_loop)
-	recon_tools(recon_tools)
-	analysis_tools(analysis_tools)
 	__end__([<p>__end__</p>]):::last
 	__start__ --> conversational_handler;
-	analysis_tools --> result_interpreter;
 	conversational_handler -. &nbsp;review&nbsp; .-> human_in_loop;
 	conversational_handler -. &nbsp;proceed&nbsp; .-> recon_executor;
 	human_in_loop -. &nbsp;stop&nbsp; .-> __end__;
 	human_in_loop -. &nbsp;continue&nbsp; .-> conversational_handler;
-	recon_executor -. &nbsp;tools&nbsp; .-> recon_tools;
 	recon_executor --> result_interpreter;
-	recon_tools --> recon_executor;
-	result_interpreter -. &nbsp;tools&nbsp; .-> analysis_tools;
 	result_interpreter --> strategy_advisor;
 	strategy_advisor --> human_in_loop;
 	classDef default fill:#f2f0ff,line-height:1.2

@@ -42,3 +42,14 @@ ALLOWED_MODELS = [
 # MCP Tools
 RECON_TOOLS = "recon_tools"
 ANALYSIS_TOOLS = "analysis_tools"
+
+ALL_TOOLS = [
+    "search_exploitdb",
+    "detect_web_technologies",
+    "lookup_cve",
+    "secure_executor",
+    "get_executor_history",
+    "get_security_tools",
+    "make_http_request",
+    "check_security_headers",
+]

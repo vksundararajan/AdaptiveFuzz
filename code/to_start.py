@@ -17,8 +17,10 @@ from consts import (
 from graph import build_adaptive_graph
 from paths import PROMPTS_CONFIG_PATH
 from state import initialize_adaptive_state
-from to_help import load_yaml_file
+from to_help import load_yaml_file, save_graph_visualization
 from to_prompt import c_prompt
+
+from paths import RECON_TOOLS_PATH, ANALYSIS_TOOLS_PATH
 
 
 async def run_adaptivefuzz(target_ip: str, user_query: str) -> Dict[str, Any]:
@@ -30,7 +32,7 @@ async def run_adaptivefuzz(target_ip: str, user_query: str) -> Dict[str, Any]:
     recon_tools = MultiServerMCPClient({
         "http": {
             "command": "python",
-            "args": ["code/tools/recon_tools.py"],
+            "args": [RECON_TOOLS_PATH],
             "transport": "stdio",
         },
     })
@@ -40,7 +42,7 @@ async def run_adaptivefuzz(target_ip: str, user_query: str) -> Dict[str, Any]:
     analysis_tools = MultiServerMCPClient({
         "terminal": {
             "command": "python",
-            "args": ["code/tools/analysis_tools.py"],
+            "args": [ANALYSIS_TOOLS_PATH],
             "transport": "stdio",
         },
     })    

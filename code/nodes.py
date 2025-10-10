@@ -1,7 +1,7 @@
 import json
 from typing import Any, Callable, Dict
 from state import AdaptiveState
-from langchain_core.messages import AIMessage, HumanMessage
+from langchain_core.messages import AIMessage, HumanMessage, ToolMessage
 from langgraph.types import interrupt
 from to_prompt import h_response, b_message, show_state
 
@@ -56,7 +56,6 @@ def make_ch_node(llm_model: str) -> Callable[[Dict[str, Any]], Dict[str, Any]]:
 
         print("🅰  Conversational Handler")
         print(show_state(state))
-
         return {
             TO_LOOP: False,
             STRATEGIES: [],
@@ -72,31 +71,51 @@ def make_ch_node(llm_model: str) -> Callable[[Dict[str, Any]], Dict[str, Any]]:
 
 def make_re_node(llm_model: str, tools: list) -> Callable[[Dict[str, Any]], Dict[str, Any]]:
     llm = get_llm(llm_model)
-    model_with_tools = llm.bind_tools(tools)
+    model_with_tools = llm.bind_tools(tools) 
+    tool_dict = {tool.name: tool for tool in tools}
 
     def recon_executor_node(state: AdaptiveState) -> Dict[str, Any]:
         """Execute tasks using MCP tools and record results (stub)."""
-        print(show_state(state))
         messages = b_message(
             list(state[RECON_EXECUTOR_MESSAGES])
             + list(state[PENDING_TASKS])
         )
-        ai_response = model_with_tools.with_structured_output(response_t[RECON_EXECUTOR]).invoke(messages)
+        
+        ai_response = model_with_tools.invoke(messages)
+        next_messages = list(state.get(RECON_EXECUTOR_MESSAGES, []))
+        next_messages.append(ai_response)
 
-        updated_tasks = ai_response.get("pending_tasks", state[PENDING_TASKS])
+        if ai_response.tool_calls:
+            tool_messages = []
+            for tool_call in ai_response.tool_calls:
+                tool_name = tool_call['name']
+                print(f"⛏ {tool_name} tool is being called")
+                print(tool_call)
+                tool = tool_dict.get(tool_name)
+                if tool:
+                    result = tool.func(**tool_call['args'])
+                print(tool)
+                tool_messages.append(ToolMessage(content=json.dumps(result), tool_call_id=tool_call['id']))
+            next_messages.extend(tool_messages)
+            messages_for_update = b_message(next_messages + list(state[PENDING_TASKS]))
+            update_response = model_with_tools.invoke(messages_for_update)
+            next_messages.append(update_response)
+            updated_tasks = json.loads(update_response.content).get("pending_tasks", state[PENDING_TASKS])
+            executed_commands = json.loads(update_response.content).get("executed_commands", state[EXECUTED_COMMANDS])
+        else:
+            updated_tasks = json.loads(ai_response.content).get("pending_tasks", state[PENDING_TASKS])
+            executed_commands = json.loads(ai_response.content).get("executed_commands", state[EXECUTED_COMMANDS])
+
         newly_completed = [task for task in updated_tasks if task.get("status") == "completed"]
         pending_tasks = [task for task in updated_tasks if task.get("status") != "completed"]
         completed_tasks = list(state[COMPLETED_TASKS]) + newly_completed
 
-        next_messages = list(state.get(RECON_EXECUTOR_MESSAGES, []))
-        next_messages.append(AIMessage(content=json.dumps(ai_response)))
-
         print("🅰  Recon Executor")
-
+        print(show_state(state))
         return {
             PENDING_TASKS: pending_tasks,
             COMPLETED_TASKS: completed_tasks,
-            EXECUTED_COMMANDS: ai_response.get("executed_commands", state[EXECUTED_COMMANDS]),
+            EXECUTED_COMMANDS: executed_commands,
             RECON_EXECUTOR_MESSAGES: next_messages,
             LAST_UPDATE_TS: update_ts(),
         }
@@ -110,6 +129,8 @@ def make_ri_node(llm_model: str, tools: list) -> Callable[[Dict[str, Any]], Dict
 
     def result_interpreter_node(state: AdaptiveState) -> Dict[str, Any]:
         """Normalise execution evidence into findings."""
+        
+        print(show_state(state))
 
         messages = b_message(
             list(state[RESULT_INTERPRETER_MESSAGES])
@@ -123,7 +144,7 @@ def make_ri_node(llm_model: str, tools: list) -> Callable[[Dict[str, Any]], Dict
         next_messages.append(AIMessage(content=json.dumps(ai_response)))
 
         print("🅰  Result Interpreter")
-
+        print(show_state(state))
         return {
             FINDINGS: ai_response.get("findings", state[FINDINGS]),
             RESULT_INTERPRETER_MESSAGES: next_messages,
@@ -152,7 +173,7 @@ def make_sa_node(llm_model: str) -> Callable[[Dict[str, Any]], Dict[str, Any]]:
         next_messages.append(AIMessage(content=json.dumps(ai_response)))
 
         print("🅰  Strategy Advisor")
-
+        print(show_state(state))
         return {
             STRATEGIES: ai_response.get("strategies", state[STRATEGIES]),
             STRATEGY_ADVISOR_MESSAGES: next_messages,
@@ -164,6 +185,7 @@ def make_sa_node(llm_model: str) -> Callable[[Dict[str, Any]], Dict[str, Any]]:
 
 def make_hr_node(llm_model: str) -> Callable[[Dict[str, Any]], Dict[str, Any]]:
     def human_in_loop_node(state: AdaptiveState) -> Dict[str, Any]:
+        print(show_state(state))
         summary = h_response(
             findings=state[FINDINGS],
             completed_tasks=state.get(COMPLETED_TASKS, []),
@@ -179,7 +201,7 @@ def make_hr_node(llm_model: str) -> Callable[[Dict[str, Any]], Dict[str, Any]]:
 
         messages = list(state.get(HUMAN_IN_LOOP_MESSAGES, []))
         messages.append(HumanMessage(content=human_message))
-
+        print(show_state(state))
         return {
             TO_LOOP: True,
             FUZZ_ID: state.get(FUZZ_ID),

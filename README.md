@@ -13,6 +13,37 @@ AdaptiveFuzz streamlines and manages reconnaissance for authorised penetration t
 
 3. Attack Strategy Planning: The gathered intelligence helps attackers tailor their approach and increases the chances of a successful breach.
 
+
+## Architecture
+
+```mermaid
+---
+config:
+  flowchart:
+    curve: linear
+---
+graph TD;
+	__start__([<p>__start__</p>]):::first
+	conversational_handler(conversational_handler)
+	recon_executor(recon_executor)
+	result_interpreter(result_interpreter)
+	strategy_advisor(strategy_advisor)
+	human_in_loop(human_in_loop)
+	__end__([<p>__end__</p>]):::last
+	__start__ --> conversational_handler;
+	conversational_handler -. &nbsp;review&nbsp; .-> human_in_loop;
+	conversational_handler -. &nbsp;proceed&nbsp; .-> recon_executor;
+	human_in_loop -. &nbsp;stop&nbsp; .-> __end__;
+	human_in_loop -. &nbsp;continue&nbsp; .-> conversational_handler;
+	recon_executor --> result_interpreter;
+	result_interpreter --> strategy_advisor;
+	strategy_advisor --> human_in_loop;
+	classDef default fill:,line-height:1.2
+	classDef first fill-opacity:0
+	classDef last fill:
+```
+
+
 ## Installation
 
 1. **Clone the repository:**
@@ -37,41 +68,6 @@ AdaptiveFuzz streamlines and manages reconnaissance for authorised penetration t
    python3 code/to_start.py
    ```
 
-## Architecture
-
-
-```mermaid
----
-config:
-  flowchart:
-    curve: CARDINAL
----
-graph TD;
-	__start__([<p>__start__</p>]):::first
-	conversational_handler(conversational_handler)
-	recon_executor(recon_executor)
-	result_interpreter(result_interpreter)
-	strategy_advisor(strategy_advisor)
-	human_in_loop(human_in_loop)
-	recon_tools(recon_tools)
-	analysis_tools(analysis_tools)
-	__end__([<p>__end__</p>]):::last
-	__start__ --> conversational_handler;
-	analysis_tools --> result_interpreter;
-	conversational_handler -. &nbsp;review&nbsp; .-> human_in_loop;
-	conversational_handler -. &nbsp;proceed&nbsp; .-> recon_executor;
-	human_in_loop -. &nbsp;stop&nbsp; .-> __end__;
-	human_in_loop -. &nbsp;continue&nbsp; .-> conversational_handler;
-	recon_executor -. &nbsp;tools&nbsp; .-> recon_tools;
-	recon_executor --> result_interpreter;
-	recon_tools --> recon_executor;
-	result_interpreter -. &nbsp;tools&nbsp; .-> analysis_tools;
-	result_interpreter --> strategy_advisor;
-	strategy_advisor --> human_in_loop;
-	classDef default fill:,line-height:1.2
-	classDef first fill-opacity:0
-	classDef last fill:
-```
 
 ## MCP Tools
 

@@ -75,7 +75,7 @@ adaptive_system:
           Review executed_commands outputs and extract significant findings. 
           Each finding must be grounded in actual outputs - no speculation. 
           Include relevant CVE IDs or external references when available. 
-          Focus on discovered vulnerabilities, open services, and security weaknesses.
+          Focus on discovered vulnerabilities and security weaknesses using mcp tools.
         tools:
           mcp_access: true
           available_tools:
