@@ -8,3 +8,5 @@ requests
 webtech
 python-dotenv
 typing-extensions
+langchain-groq
+langgraph-cli[inmem]
