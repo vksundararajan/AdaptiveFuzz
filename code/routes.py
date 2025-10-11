@@ -1,4 +1,5 @@
 from typing import Literal
+from state import AdaptiveState
 from consts import (
     TO_LOOP,
     IS_INAPPROPRIATE,
@@ -7,7 +8,6 @@ from consts import (
     RESULT_INTERPRETER,
     STRATEGY_ADVISOR
 )
-from state import AdaptiveState
 
 
 def route_from_human(state: AdaptiveState) -> Literal["continue", "stop"]:

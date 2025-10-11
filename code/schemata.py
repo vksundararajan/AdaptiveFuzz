@@ -32,9 +32,17 @@ class recon_executor_schema(BaseModel):
 
 class result_interpreter_schema(BaseModel):
     """Class that defines the structure of the result interpreter."""
-    findings: List[str] = Field(description="list your exploit findings.")
+    findings: List[str] = Field(description="A list of concise, human-readable security findings derived from the tool outputs.")
+
+
+class Strategy(BaseModel):
+    """A single, actionable strategy for the next phase of the penetration test."""
+    strategy: str = Field(description="A concise, one-sentence summary of the recommended action.")
+    rationale: str = Field(description="A brief explanation of why this strategy is recommended based on the findings.")
 
 
 class strategy_advisor_schema(BaseModel):
     """Class that defines the structure of the strategy advisor."""
-    strategies: List[str] = Field(description="list your strategies.")
+    strategies: List[Strategy] = Field(
+        description="A list of exactly three prioritized, strategic next steps for the penetration test."
+    )

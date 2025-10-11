@@ -45,18 +45,18 @@ def initialize_adaptive_state(
 ) -> AdaptiveState:
     """Initialize a compact reconnaissance-oriented AdaptiveState."""
 
-    ch_msgs: List[AnyMessage] = [SystemMessage(s_prompt(conversational_handler))]
-    re_msgs: List[AnyMessage] = [SystemMessage(s_prompt(recon_executor))]
-    ri_msgs: List[AnyMessage] = [SystemMessage(s_prompt(result_interpreter))]
-    sa_msgs: List[AnyMessage] = [SystemMessage(s_prompt(strategy_advisor))]
-    hi_msgs: List[AnyMessage] = [HumanMessage(user_query)]
+    ch_messages: List[AnyMessage] = [SystemMessage(s_prompt(conversational_handler))]
+    re_messages: List[AnyMessage] = [SystemMessage(s_prompt(recon_executor))]
+    ri_messages: List[AnyMessage] = [SystemMessage(s_prompt(result_interpreter))]
+    sa_messages: List[AnyMessage] = [SystemMessage(s_prompt(strategy_advisor))]
+    hi_messages: List[AnyMessage] = [HumanMessage(user_query)]
 
     return AdaptiveState(
-        conversational_handler_messages=ch_msgs,
-        recon_executor_messages=re_msgs,
-        result_interpreter_messages=ri_msgs,
-        strategy_advisor_messages=sa_msgs,
-        human_in_loop_messages=hi_msgs,
+        conversational_handler_messages=ch_messages,
+        recon_executor_messages=re_messages,
+        result_interpreter_messages=ri_messages,
+        strategy_advisor_messages=sa_messages,
+        human_in_loop_messages=hi_messages,
         fuzz_id=fuzz_id,
         target_ip=target_ip,
         user_query=user_query,

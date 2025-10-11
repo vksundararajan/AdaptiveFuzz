@@ -6,7 +6,6 @@ from paths import PROMPTS_CONFIG_PATH
 from to_help import load_yaml_file
 
 
-
 PROMPTS_CONFIG: Dict[str, Any] = load_yaml_file(PROMPTS_CONFIG_PATH)
 
 
@@ -74,7 +73,6 @@ def c_prompt(
         try:
             value = input(prompt_text).strip()
         except KeyboardInterrupt: 
-            print("\n⚠️  Aborted by user.")
             raise SystemExit(1)
 
         if value:
@@ -127,23 +125,3 @@ def h_response(
     return "\n".join(response_parts)
 
 
-def _s_state(state: Dict[str, Any], title: str) -> str:
-    """Formats and prints the current state of the fuzzer."""
-    
-    show = ""
-    show += "––––––––––––" + title + "––––––––––––\n"
-    
-    state_copy = state.copy()
-    message_keys = [
-        'conversational_handler_messages',
-        'recon_executor_messages',
-        'result_interpreter_messages',
-        'strategy_advisor_messages',
-    ]
-    for key in message_keys:
-        if key in state_copy:
-            del state_copy[key]
-    
-    show += json.dumps(state_copy, indent=2, default=str)
-    
-    print(show + "\n")

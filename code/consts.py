@@ -4,6 +4,7 @@ RECON_EXECUTOR = "recon_executor"
 RESULT_INTERPRETER = "result_interpreter"
 STRATEGY_ADVISOR = "strategy_advisor"
 HUMAN_IN_LOOP = "human_in_loop"
+REQUEST_PARSER = "request_parser"
 
 
 # Config Keys
