@@ -122,23 +122,9 @@ def h_response(
             status = task.get("status", "pending")
             response_parts.append(f"- ({task_id}) {description} - {status}")
     
-    response_parts.append("\n🔀  What do we do next?")
+    response_parts.append("\n💡  What would you like to do next?")
 
     return "\n".join(response_parts)
-
-
-def b_message(*sources):
-    """Normalize mixed lists of messages and data into valid LangChain Message objects."""
-    messages = []
-    for src in sources:
-        for m in src or []:
-            if isinstance(m, (AIMessage, HumanMessage, SystemMessage)):
-                messages.append(m)
-            elif isinstance(m, str):
-                messages.append(SystemMessage(content=m))
-            else:
-                messages.append(SystemMessage(content=json.dumps(m)))
-    return messages
 
 
 def _s_state(state: Dict[str, Any], title: str) -> str:
@@ -153,7 +139,6 @@ def _s_state(state: Dict[str, Any], title: str) -> str:
         'recon_executor_messages',
         'result_interpreter_messages',
         'strategy_advisor_messages',
-        'human_in_loop_messages'
     ]
     for key in message_keys:
         if key in state_copy:

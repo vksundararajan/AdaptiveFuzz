@@ -1,6 +1,7 @@
 import json
 import os
 import yaml
+import asyncio
 from datetime import datetime
 from typing import Any, Dict
 from dotenv import load_dotenv
@@ -13,6 +14,7 @@ from paths import OUTPUT_DIR, AI_RESPONSE_PATH
 
 from langchain_groq import ChatGroq
 
+load_dotenv()
 
 def get_llm(llm_model: str):
     """
@@ -28,8 +30,6 @@ def get_llm(llm_model: str):
         ValueError: If model name is not in the approved whitelist
     """
     if llm_model in ALLOWED_MODELS:
-        load_dotenv()
-
         api_key = os.getenv("GROQ_API_KEY")
         return ChatGroq(model=llm_model, temperature=0.2, api_key=api_key)
         
@@ -83,6 +83,14 @@ def load_yaml_file(file_path: str) -> Dict[str, Any]:
     with open(file_path, 'r') as f:
         config = yaml.safe_load(f)
     return config
+
+
+async def load_yaml_file_async(file_path: str) -> Dict[str, Any]:
+    """
+    Asynchronously loads a YAML configuration file by running the synchronous
+    I/O in a separate thread.
+    """
+    return await asyncio.to_thread(load_yaml_file, file_path)
 
 
 def save_graph_visualization(

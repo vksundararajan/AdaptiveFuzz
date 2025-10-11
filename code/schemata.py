@@ -1,105 +1,40 @@
-conversational_handler_schema = {
-    "title": "conversational_handler",
-    "description": "Track pending moderation tasks and appropriateness flag.",
-    "type": "object",
-    "properties": {
-        "pending_tasks": {
-            "type": "array",
-            "items": {
-                "type": "object",
-                "properties": {
-                    "task_id": {"type": "string"},
-                    "description": {"type": "string"},
-                    "status": {"type": "string", "enum": ["pending", "completed", "failed"]}
-                },
-                "required": ["task_id", "description", "status"],
-                "additionalProperties": False
-            }
-        },
-        "is_inappropriate": {"type": "boolean"}
-    },
-    "required": ["pending_tasks", "is_inappropriate"],
-    "additionalProperties": False
-}
-
-recon_executor_schema = {
-    "title": "recon_executor",
-    "description": "Record recon tasks and executed command outputs.",
-    "type": "object",
-    "properties": {
-        "pending_tasks": {
-            "type": "array",
-            "items": {
-                "type": "object",
-                "properties": {
-                    "task_id": {"type": "string"},
-                    "description": {"type": "string"},
-                    "status": {"type": "string", "enum": ["pending", "completed", "failed"]}
-                },
-                "required": ["task_id", "description", "status"],
-                "additionalProperties": False
-            }
-        },
-        "executed_commands": {
-            "type": "array",
-            "items": {
-                "type": "object",
-                "properties": {
-                    "command": {"type": "string"},
-                    "output": {"type": "string"}
-                },
-                "required": ["command", "output"],
-                "additionalProperties": False
-            }
-        }
-    },
-    "required": ["pending_tasks", "executed_commands"],
-    "additionalProperties": False
-}
-
-result_interpreter_schema = {
-    "title": "result_interpreter",
-    "description": "Summarise and detail findings from recon.",
-    "type": "object",
-    "properties": {
-        "findings": {
-            "type": "array",
-            "items": {
-                "type": "object",
-                "properties": {
-                    "summary": {"type": "string"},
-                    "details": {
-                        "type": "object",
-                        "additionalProperties": {"type": "string"}
-                    }
-                },
-                "additionalProperties": False
-            }
-        }
-    },
-    "required": ["findings"],
-    "additionalProperties": False
-}
-
-strategy_advisor_schema = {
-    "title": "strategy_advisor",
-    "description": "Advise next steps based on results.",
-    "type": "object",
-    "properties": {
-        "strategies": {
-            "type": "array",
-            "items": {"type": "string"}
-        }
-    },
-    "required": ["strategies"],
-    "additionalProperties": False
-}
+from typing import List, Dict, Literal, Optional
+from pydantic import BaseModel, Field
 
 
-response_t = {
-    "conversational_handler": conversational_handler_schema,
-    "recon_executor": recon_executor_schema,
-    "result_interpreter": result_interpreter_schema,
-    "strategy_advisor": strategy_advisor_schema
-}
+class Task(BaseModel):
+    """Inner class defining the structure of a single task."""
+    task: str = Field(description="A description of the task.")
+    status: Literal["Pending", "Completed", "Failed"] = Field(
+        description="The current status of the task."
+    )
 
+
+class Command(BaseModel):
+    command: str = Field(description="The command that was executed.")
+    output: str = Field(description="The output of the executed command.")
+
+
+class conversational_handler_schema(BaseModel):
+    """Class that defines the structure of the conversational handler."""
+    pending_tasks: List[Task] = Field(description="A list of small recon tasks.")
+    is_inappropriate: bool = Field(
+        description="A boolean indicating if the content is inappropriate."
+    )
+
+
+class recon_executor_schema(BaseModel):
+    """Class that defines the structure of the recon executor."""
+    pending_tasks: List[Task] = Field(description="A list of pending recon tasks.")
+    completed_tasks: List[Task] = Field(description="A list of completed recon tasks.")
+    executed_commands: List[Command] = Field(description="A list of executed commands and its output.")
+
+
+class result_interpreter_schema(BaseModel):
+    """Class that defines the structure of the result interpreter."""
+    findings: List[str] = Field(description="list your exploit findings.")
+
+
+class strategy_advisor_schema(BaseModel):
+    """Class that defines the structure of the strategy advisor."""
+    strategies: List[str] = Field(description="list your strategies.")

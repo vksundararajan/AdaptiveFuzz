@@ -205,3 +205,9 @@ cython_debug/
 marimo/_static/
 marimo/_lsp/
 __marimo__/
+
+# Custom
+.langgraph_api
+outputs/log.txt
+outputs/graph.mmd
+outputs/graph.png
