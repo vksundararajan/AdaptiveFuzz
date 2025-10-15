@@ -16,20 +16,17 @@ config:
 ---
 graph TD;
 	__start__([<p>__start__</p>]):::first
-	request_parser(request_parser)
 	conversational_handler(conversational_handler)
 	recon_executor(recon_executor)
 	result_interpreter(result_interpreter)
 	strategy_advisor(strategy_advisor)
 	human_in_loop(human_in_loop)
 	__end__([<p>__end__</p>]):::last
-	__start__ --> request_parser;
-	conversational_handler -. &nbsp;review&nbsp; .-> human_in_loop;
-	conversational_handler -. &nbsp;proceed&nbsp; .-> recon_executor;
+	__start__ --> conversational_handler;
+	conversational_handler --> recon_executor;
 	human_in_loop -. &nbsp;stop&nbsp; .-> __end__;
-	human_in_loop -. &nbsp;continue&nbsp; .-> conversational_handler;
+	human_in_loop -. &nbsp;continue&nbsp; .-> recon_executor;
 	recon_executor --> result_interpreter;
-	request_parser --> conversational_handler;
 	result_interpreter --> strategy_advisor;
 	strategy_advisor --> human_in_loop;
 	classDef default fill:,line-height:1.2
@@ -74,13 +71,4 @@ graph TD;
 
 ## MCP Tools
 
-AdaptiveFuzz is powered by 8 security-focused MCP tools that help pentesters sort out their own security assessment.
-
-- secure_executor
-- get_executor_history
-- get_allowed_commands
-- make_http_request
-- check_security_headers
-- search_exploitdb 
-- detect_technologies
-- lookup_cve
+AdaptiveFuzz is powered by security-focused MCP tools that help pentesters sort out their own security assessment – `recon_tools`, `analysis_tools`

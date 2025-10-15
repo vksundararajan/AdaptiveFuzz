@@ -35,15 +35,15 @@ async def get_mcp_tools() -> List[BaseTool]:
 async def call_tools(
     ai_response: AIMessage,
     tool_map: Dict[str, BaseTool],
-    io: List[Dict[str, Any]]
-) -> Tuple[List[Dict[str, Any]], List[ToolMessage]]:
+) -> Tuple[List[Dict[str, Any]]]:
     """
     Processes tool calls from an AI response, executes them asynchronously, and returns results.
     """
     if not ai_response.tool_calls:
-        return io, []
-
-    tool_messages: List[ToolMessage] = []
+        return []
+    
+    io = []
+    print(tool_map)
     
     for tool_call in ai_response.tool_calls:
         tool_name = tool_call["name"]
@@ -55,16 +55,10 @@ async def call_tools(
             observation = await tool_to_run.ainvoke(tool_args)
             
             io.append({"input": tool_input_str, "output": str(observation)})
-            tool_messages.append(
-                ToolMessage(content=str(observation), tool_call_id=tool_call["id"])
-            )
         except Exception as e:
             error_message = f"Error executing tool {tool_name}: {str(e)}"
             print(f"  - {error_message}")
 
             io.append({"input": tool_input_str, "output": error_message})
-            tool_messages.append(
-                ToolMessage(content=error_message, tool_call_id=tool_call["id"])
-            )
             
-    return io, tool_messages
+    return io

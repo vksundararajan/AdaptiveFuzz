@@ -4,7 +4,6 @@ RECON_EXECUTOR = "recon_executor"
 RESULT_INTERPRETER = "result_interpreter"
 STRATEGY_ADVISOR = "strategy_advisor"
 HUMAN_IN_LOOP = "human_in_loop"
-REQUEST_PARSER = "request_parser"
 
 
 # Config Keys
@@ -12,19 +11,9 @@ ADAPTIVE_SYSTEM = "adaptive_system"
 
 
 # State Keys
-CONVERSATIONAL_HANDLER_MESSAGES = "conversational_handler_messages"
-RECON_EXECUTOR_MESSAGES = "recon_executor_messages"
-RESULT_INTERPRETER_MESSAGES = "result_interpreter_messages"
-STRATEGY_ADVISOR_MESSAGES = "strategy_advisor_messages"
-HUMAN_IN_LOOP_MESSAGES = "human_in_loop_messages"
-FUZZ_ID = "fuzz_id"
 TARGET_IP = "target_ip"
-PENDING_TASKS = "pending_tasks"
-EXECUTED_COMMANDS = "executed_commands"
+TASKS = "tasks"
 FINDINGS = "findings"
-POLICY = "policy"
-CYCLE = "cycle"
-LAST_UPDATE_TS = "last_update_ts"
 TO_LOOP = "to_loop"
 STRATEGIES = "strategies"
 IS_INAPPROPRIATE = "is_inappropriate"
@@ -45,12 +34,6 @@ RECON_TOOLS = "recon_tools"
 ANALYSIS_TOOLS = "analysis_tools"
 
 ALL_TOOLS = [
-    "search_exploitdb",
-    "detect_web_technologies",
-    "lookup_cve",
-    "secure_executor",
-    "get_executor_history",
-    "get_security_tools",
-    "make_http_request",
-    "check_security_headers",
+    "port_scanner",
+    "web_search",
 ]

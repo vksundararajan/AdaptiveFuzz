@@ -36,31 +36,8 @@ def get_llm(llm_model: str):
         return ChatGroq(model=llm_model, temperature=0.2, api_key=api_key)
         
         # For Gemini
-        # api_key = os.getenv("GOOGLE_API_KEY")
+        # api_key = os.getenv("GEMINI_API_KEY")
         # return ChatGoogleGenerativeAI(model=llm_model, temperature=0.2, api_key=api_key)
-    else:
-        raise ValueError(
-            f"Invalid model '{llm_model}'. "
-            f"Allowed Gemini models: {sorted(ALLOWED_MODELS)}"
-        )
-
-
-def get_fake_llm(llm_model: str):
-    """
-    Fake AI Response.
-    """
-    if llm_model in ALLOWED_MODELS:
-        responses = load_yaml_file(AI_RESPONSE_PATH).get("ai_response", {})
-
-        class _StaticLLM:
-            def __init__(self, data: Dict[str, Any]) -> None:
-                self._data = data
-
-            def invoke(self, _messages, agent: str, **_kwargs):
-                content = self._data.get(agent, {})
-                return json.dumps(content, ensure_ascii=False)
-
-        return _StaticLLM(responses)
     else:
         raise ValueError(
             f"Invalid model '{llm_model}'. "
@@ -87,7 +64,7 @@ def load_yaml_file(file_path: str) -> Dict[str, Any]:
     return config
 
 
-async def load_yaml_file_async(file_path: str) -> Dict[str, Any]:
+async def wait_yaml_file(file_path: str) -> Dict[str, Any]:
     """
     Asynchronously loads a YAML configuration file by running the synchronous
     I/O in a separate thread.
@@ -131,11 +108,3 @@ def save_graph_visualization(
         except Exception:
             return None
 
-
-def update_ts() -> Dict[str, str]:
-    """Return the current date and time as a lightweight dict."""
-
-    now = datetime.now()
-    date = now.strftime("%m/%d/%Y")
-    time = now.strftime("%-I:%M %p")
-    return {"date": date, "time": time}
