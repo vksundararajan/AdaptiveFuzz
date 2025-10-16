@@ -6,38 +6,20 @@ adaptive_system:
     conversational_handler:
       llm: openai/gpt-oss-120b
       prompt_config: |
-        Imagine this is a pentesting assessment.
-        You are the first agent who receives the user query.
-        Your job is to break down the user query into smaller tasks.
-        These smaller tasks should be simple, executable.
-        No MCP tools allowed.
-        For testing purpose, just create one task according to the schema provided
-        - find the open ports in this ip address
-
+        Imagine you are a part of reconnisance phase of penetration testing team.
 
     recon_executor:
       llm: openai/gpt-oss-120b
       prompt_config: |
-        Imagine this is a pentesting assessment.
-        You are the second agent who receives the recon tasks.
-        Your job is to execute the recon tasks using the MCP tools provided.
-        Use ONLY the provided tools to accomplish them.
-        If there are no pending tasks, do not call any tools and respond with an empty tool call list.
-        Tools available:
-        - port_scanner
-        - web_content_scanner
-        - dns_enumerator
-        For testing purpose, just run the port_scanner tools from MCP
-        - call port_scanner tool with target ip and needed ports list
+        Imagine you are a part of reconnisance phase of penetration testing team.
 
     result_interpreter:
       llm: openai/gpt-oss-120b
       prompt_config: |
-        Imagine
-
+        Imagine you are a part of reconnisance phase of penetration testing team.
 
     strategy_advisor:
       llm: openai/gpt-oss-120b
       prompt_config: |
-        Imagine
+        Imagine you are a part of reconnisance phase of penetration testing team.
 

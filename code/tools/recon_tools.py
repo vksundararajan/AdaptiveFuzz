@@ -6,13 +6,13 @@ mcp = FastMCP("Executor Tools")
 
 
 @mcp.tool()
-def port_scanner(target_ip: str, ports: List[int]):
+def port_scanner(target_ip: str, ports: List[int], task_id: str) -> List[int]:
     """
     Scans the specified ports on the target IP and returns a list of open ports.
     Args:
         target_ip (str): The target IP address to scan.
         ports (List[int]): A list of port numbers to scan.
-        task_id (int): The ID of the task from the state the scan.
+        task_id (str): The ID of the task this scan is for. (REQUIRED)
     Returns:
         List[int]: A list of open ports.
     """

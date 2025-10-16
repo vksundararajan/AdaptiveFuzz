@@ -12,7 +12,16 @@ mcp = FastMCP("Analysis Tools")
 
 
 @mcp.tool()
-async def web_search(query: str, num_results: int = 5):
+async def web_search(query: str, task_id: str, num_results: int = 5):
+    """
+    Performs a web search using the Google Custom Search API and returns combined query and search results.
+    Args:
+        query (str): The search query.
+        num_results (int): The number of search results to return.
+        task_id (str): The ID of the task this search is for. (REQUIRED)
+    Returns:
+        str: The combined query and search results.
+    """
     search_api = os.getenv("GOOGLE_SEARCH_API")
     engine_id = os.getenv("SEARCH_ENGINE_ID")
     

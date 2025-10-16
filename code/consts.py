@@ -17,8 +17,8 @@ FINDINGS = "findings"
 TO_LOOP = "to_loop"
 STRATEGIES = "strategies"
 IS_INAPPROPRIATE = "is_inappropriate"
-COMPLETED_TASKS = "completed_tasks"
 USER_QUERY = "user_query"
+TOOL_RESULTS = "tool_results"
 
 
 # Allowed LLM models
