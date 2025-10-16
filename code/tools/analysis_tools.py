@@ -1,17 +1,13 @@
 import os
-import json
 import aiohttp
-import asyncio
-import asyncio
-import requests
 from dotenv import load_dotenv
-from mcp.server.fastmcp import FastMCP
+from fastmcp import FastMCP
 
 load_dotenv()
 mcp = FastMCP("Analysis Tools")
 
 
-@mcp.tool()
+@mcp.tool(tags={"web"})
 async def web_search(query: str, task_id: str, num_results: int = 5):
     """
     Performs a web search using the Google Custom Search API and returns combined query and search results.

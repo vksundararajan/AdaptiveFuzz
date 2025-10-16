@@ -1,6 +1,6 @@
-from paths import CODE_DIR
 import sys
-sys.path.insert(0, CODE_DIR)
+import os
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 # ----------------------------------------------------------------
 
 import asyncio
@@ -11,12 +11,13 @@ from langgraph.prebuilt import ToolNode
 
 from state import AdaptiveState
 from paths import PROMPTS_CONFIG_PATH
-from tools import get_mcp_tools
+from tools import get_mcp_tools, filter_tools
 from to_help import wait_yaml_file, save_graph_visualization
 from routes import route_from_human, route_from_conversational_handler
 from nodes import (
     make_ch_node,
     make_re_node,
+    make_wa_node,
     make_ri_node,
     make_sa_node,
     make_hr_node,
@@ -24,6 +25,7 @@ from nodes import (
 from consts import (
     CONVERSATIONAL_HANDLER,
     RECON_EXECUTOR,
+    WEB_ANALYZER,
     RESULT_INTERPRETER,
     STRATEGY_ADVISOR,
     HUMAN_IN_LOOP,
@@ -48,7 +50,13 @@ async def build_adaptive_graph() -> StateGraph:
     graph.add_node(RECON_EXECUTOR, make_re_node(
         llm_model=config["agents"][RECON_EXECUTOR]["llm"], 
         prompt=config["agents"][RECON_EXECUTOR]["prompt_config"],
-        tools=mcp_tools
+        tools=filter_tools(mcp_tools, 'recon')
+    ))
+    
+    graph.add_node(WEB_ANALYZER, make_wa_node(
+        llm_mode=config["agents"][WEB_ANALYZER]["llm"],
+        prompt=config["agents"][WEB_ANALYZER]["prompt_config"],
+        tools=filter_tools(mcp_tools, 'web')
     ))
     
     graph.add_node(RESULT_INTERPRETER, make_ri_node(
@@ -73,8 +81,8 @@ async def build_adaptive_graph() -> StateGraph:
         }
     )
     
-    graph.add_edge(CONVERSATIONAL_HANDLER, RECON_EXECUTOR)
-    graph.add_edge(RECON_EXECUTOR, RESULT_INTERPRETER)
+    graph.add_edge(RECON_EXECUTOR, WEB_ANALYZER)
+    graph.add_edge(WEB_ANALYZER, RESULT_INTERPRETER)
     graph.add_edge(RESULT_INTERPRETER, STRATEGY_ADVISOR)
     graph.add_edge(STRATEGY_ADVISOR, HUMAN_IN_LOOP)    
     

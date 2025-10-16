@@ -35,7 +35,7 @@ def make_ch_node(llm_model: str, prompt: str) -> Callable[[Dict[str, Any]], Dict
         target_ip = interrupt("📌  AdaptiveFuzz: Target IP")
         user_query = interrupt("Your assistant is coming online... \n Ask Anything!")
         
-        # target_ip = "8.8.8.8"
+        # target_ip = "45.33.32.156"
         # user_query = "Check the open ports in the target ip and find vulnerabilities"
         
         messages = [
@@ -46,7 +46,8 @@ def make_ch_node(llm_model: str, prompt: str) -> Callable[[Dict[str, Any]], Dict
                 + "If the request is inappropriate, respond accordingly." + "\n"
                 + "Available tools are: " + "\n"
                 + "1. port_scanner: A tool to scan open ports on a target IP address." + "\n"
-                + "2. web_search: A tool to perform web searches for gathering information." + "\n"
+                + "2. banner_grabber: A tool to grab service banners from open ports on a target IP address." + "\n"
+                + "3. web_search: A tool to perform web searches for gathering information." + "\n"
                 + "When creating tasks, ensure they are specific, actionable, and relevant to the user's request." + "\n"
                 + "Do not create tasks that cannot be accomplished with the available tools." + "\n"
                 + "If the request is inappropriate, respond with is_inappropriate as true and do not create any tasks." + "\n"            
@@ -88,7 +89,8 @@ def make_re_node(llm_model: str, prompt: str, tools: List[BaseTool]) -> Callable
             SystemMessage(content=prompt + "\n"
                 + "Your goal is to execute the pending tasks using the available tools." + "\n"
                 + "Available tools are: " + "\n"
-                + "port_scanner: A tool to scan open ports on a target IP address." + "\n"
+                + "1. port_scanner: A tool to scan open ports on a target IP address." + "\n"
+                + "2. banner_grabber: A tool to grab service banners from open ports on a target IP address." + "\n"
                 + "Note: While sending tool call, include for which task you are sending the tool call in response. (task_id)" + "\n"
             ),
             HumanMessage(content= "\n"
@@ -107,6 +109,22 @@ def make_re_node(llm_model: str, prompt: str, tools: List[BaseTool]) -> Callable
                 task["status"] = "Completed"
                 task["results"] = result.get("output")
         
+        return {
+            TASKS: tasks
+        }
+
+    return recon_executor_node
+
+
+def make_wa_node(llm_mode: str, prompt: str, tools: List[BaseTool]) -> Callable[[Dict[str, Any]], Dict[str, Any]]:
+    llm = get_llm(llm_mode)
+    llm_with_tools = llm.bind_tools(tools)
+    tool_map = {tool.name: tool for tool in tools}
+    
+    async def web_analyzer_node(state: AdaptiveState) -> Dict[str, Any]:
+        """Analyze web-related findings (stub)."""
+        tasks = state.get(TASKS, [])
+        
         messages = [
             SystemMessage(content=prompt + "\n"
                 + "Your goal is to execute the pending tasks using the available tools." + "\n"
@@ -121,8 +139,6 @@ def make_re_node(llm_model: str, prompt: str, tools: List[BaseTool]) -> Callable
             HumanMessage(content=prompt+ "\n"
                 + "Now here are the tasks we already completed: " + json.dumps([task for task in tasks if task["status"] == "Completed"]) + "\n"
                 + "Here are the tasks we couldn't complete: " + json.dumps([task for task in tasks if task["status"] != "Completed"]) + "\n"
-                + "Here are the executed request inputs we sent: " + ' '.join([item['input'] for item in tool_results]) + "\n"
-                + "Here are the request outputs we received: " + ' '.join([item['output'] for item in tool_results]) + "\n"
             )
         ]
         
@@ -139,13 +155,13 @@ def make_re_node(llm_model: str, prompt: str, tools: List[BaseTool]) -> Callable
             TASKS: tasks
         }
 
-    return recon_executor_node
+    return web_analyzer_node
 
 
 def make_ri_node(llm_model: str, prompt: str) -> Callable[[Dict[str, Any]], Dict[str, Any]]:
     llm = get_llm(llm_model)
     
-    async def result_interpreter_node(state: AdaptiveState) -> Dict[str, Any]:
+    def result_interpreter_node(state: AdaptiveState) -> Dict[str, Any]:
         """Interpret tool results and extract findings (stub)."""
         tasks = state.get(TASKS, [])
         
@@ -182,7 +198,10 @@ def make_sa_node(llm_model: str, prompt: str) -> Callable[[Dict[str, Any]], Dict
             SystemMessage(content=prompt + "\n"
                 + "Your goal is to provide strategic next steps for the penetration test based on the current findings." + "\n"
                 + "Consider the overall security posture of the target and suggest actions that would be most impactful." + "\n"
-                + "Provide exactly three prioritized strategies."
+                + "Provide exactly three prioritized strategies." + "\n"
+                + "Next strategies should be in the same format as the tasks here: " + json.dumps(state.get(TASKS, [])) + "\n"
+                + "Inside this tasks, there will be task field, which will be the strategy you need to provide." + "\n"
+                + "No MCP tools are allowed to use in this step."
             ),
             HumanMessage(content= "\n"
                 + "Here are the current findings:" + json.dumps(state.get(FINDINGS, [])) + "\n"
@@ -203,22 +222,36 @@ def make_sa_node(llm_model: str, prompt: str) -> Callable[[Dict[str, Any]], Dict
 
 def make_hr_node() -> Callable[[Dict[str, Any]], Dict[str, Any]]:
     def human_in_loop_node(state: AdaptiveState) -> Dict[str, Any]:
-        """Pause for human review and input."""
+        strategies = state.get(STRATEGIES, [])
+        
         summary = h_response(
             completed_tasks=state.get(TASKS, []),
             findings=state.get(FINDINGS, []),
-            strategies=state.get(STRATEGIES, []),
+            strategies=strategies,
         )
 
-        from_human = interrupt(summary)  # will be the resume value when resumed
-        
-        u_state = {
-            TO_LOOP: True if from_human else False,
-            USER_QUERY: list(from_human)
+        options = {str(i + 1): s for i, s in enumerate(strategies)}
+        options["stop"] = None
+
+        messages = {
+            "type": "choice",
+            "message": summary,
+            "options": [
+                {"label": v if v else "stop", "value": k}
+                for k, v in options.items()
+            ],
         }
-        
-        return u_state
+
+        from_human = interrupt(messages)
+        if str(from_human) in options and options[str(from_human)]:
+            from_human = options[str(from_human)]
+        else:
+            from_human = None
+
+        return {
+            TO_LOOP: bool(from_human),
+            USER_QUERY: list(from_human) if from_human else []
+        }
 
     return human_in_loop_node
-
 

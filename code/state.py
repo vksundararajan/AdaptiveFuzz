@@ -7,11 +7,11 @@ class AdaptiveState(TypedDict):
     to_loop: bool
     in_appropriate: bool
     iteration_count: int
+    strategies: List[Any]
     user_query: Annotated[List[Any], lambda left, right: left + right]
     tasks: Annotated[List[Any], lambda left, right: right]
     completed_tasks: Annotated[List[Any], lambda left, right: left + right]
     findings: Annotated[List[Any], lambda left, right: left + right]
-    strategies: Annotated[List[Any], lambda left, right: left + right]
 
 
 def initialize_adaptive_state() -> AdaptiveState:

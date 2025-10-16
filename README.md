@@ -2,38 +2,10 @@
 
 [![Status: Ongoing](https://img.shields.io/badge/status-Ongoing-gold?style=flat-square)](https://github.com/vksundararajan/AdaptiveFuzz/issues)
 
+🔗 [Watch a demo of AdaptiveFuzz in action](https://drive.google.com/file/d/11ldkNL88Gsc22rEQPEMN-XeqM0S3iD1S/view?usp=sharing)
+
 
 AdaptiveFuzz streamlines and manages reconnaissance for authorised penetration testing by using an LLM-based, multi-controller approach. This system coordinates targeted modules and external tools and produces clear, auditable reports that help document the findings.
-
-
-## Architecture
-
-```mermaid
----
-config:
-  flowchart:
-    curve: CARDINAL
----
-graph TD;
-	__start__([<p>__start__</p>]):::first
-	conversational_handler(conversational_handler)
-	recon_executor(recon_executor)
-	result_interpreter(result_interpreter)
-	strategy_advisor(strategy_advisor)
-	human_in_loop(human_in_loop)
-	__end__([<p>__end__</p>]):::last
-	__start__ --> conversational_handler;
-	conversational_handler -. &nbsp;review&nbsp; .-> human_in_loop;
-	conversational_handler -. &nbsp;proceed&nbsp; .-> recon_executor;
-	human_in_loop -. &nbsp;stop&nbsp; .-> __end__;
-	human_in_loop -. &nbsp;continue&nbsp; .-> recon_executor;
-	recon_executor --> result_interpreter;
-	result_interpreter --> strategy_advisor;
-	strategy_advisor --> human_in_loop;
-	classDef default fill:,line-height:1.2
-	classDef first fill-opacity:0
-	classDef last fill:
-```
 
 
 ## Expected Outcome
@@ -68,6 +40,38 @@ graph TD;
    ```bash
    langgraph dev
    ```
+
+
+## Architecture
+
+```mermaid
+---
+config:
+  flowchart:
+    curve: CARDINAL
+---
+graph TD;
+	__start__([<p>__start__</p>]):::first
+	conversational_handler(conversational_handler)
+	recon_executor(recon_executor)
+	web_analyzer(web_analyzer)
+	result_interpreter(result_interpreter)
+	strategy_advisor(strategy_advisor)
+	human_in_loop(human_in_loop)
+	__end__([<p>__end__</p>]):::last
+	__start__ --> conversational_handler;
+	conversational_handler -. &nbsp;review&nbsp; .-> human_in_loop;
+	conversational_handler -. &nbsp;proceed&nbsp; .-> recon_executor;
+	human_in_loop -. &nbsp;stop&nbsp; .-> __end__;
+	human_in_loop -. &nbsp;continue&nbsp; .-> recon_executor;
+	recon_executor --> web_analyzer;
+	result_interpreter --> strategy_advisor;
+	strategy_advisor --> human_in_loop;
+	web_analyzer --> result_interpreter;
+	classDef default fill:,line-height:1.2
+	classDef first fill-opacity:0
+	classDef last fill:
+```
 
 
 ## MCP Tools

@@ -31,7 +31,6 @@ async def get_mcp_tools() -> List[BaseTool]:
     return mcp_tools
 
 
-# Add async to the function definition
 async def call_tools(
     ai_response: AIMessage,
     tool_map: Dict[str, BaseTool],
@@ -66,3 +65,10 @@ async def call_tools(
             io.append({"input": tool_input_str, "output": error_message})
             
     return io
+
+
+def filter_tools(mcp_tools: List[BaseTool], tag: str) -> List[BaseTool]:
+    """
+    Filters MCP tools based on a given tag.
+    """
+    return [tool for tool in mcp_tools if tag in tool.metadata['_meta']['_fastmcp']['tags']]

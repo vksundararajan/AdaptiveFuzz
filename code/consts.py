@@ -1,6 +1,7 @@
 # Node names
 CONVERSATIONAL_HANDLER = "conversational_handler"
 RECON_EXECUTOR = "recon_executor"
+WEB_ANALYZER = "web_analyzer"
 RESULT_INTERPRETER = "result_interpreter"
 STRATEGY_ADVISOR = "strategy_advisor"
 HUMAN_IN_LOOP = "human_in_loop"

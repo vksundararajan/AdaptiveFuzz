@@ -12,6 +12,11 @@ adaptive_system:
       llm: openai/gpt-oss-120b
       prompt_config: |
         Imagine you are a part of reconnisance phase of penetration testing team.
+      
+    web_analyzer:
+      llm: openai/gpt-oss-120b
+      prompt_config: |
+        Imagine you are a part of reconnisance phase of penetration testing team.
 
     result_interpreter:
       llm: openai/gpt-oss-120b
