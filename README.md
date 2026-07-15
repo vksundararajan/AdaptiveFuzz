@@ -50,3 +50,19 @@ flowchart TB
 
     style sandbox stroke-dasharray: 5 5,fill:transparent
 ```
+
+## Todo List
+
+- [ ] Write Python code for the Sandbox that creates a Docker container, runs a terminal command, captures the output, and deletes the container
+- [ ] Initialize Huey with SQLite in project to set up local database-backed task queue
+- [ ] Create a Huey task that takes a command string and runs it inside Sandbox code
+- [ ] Write code for the Executor to trigger multiple Huey tasks asynchronously so they run in parallel
+- [ ] Initialize a local, persistent ChromaDB database on machine to act as knowledge base
+- [ ] Write Python helper functions for RAG Tools to save parsed text findings into ChromaDB and query them later
+- [ ] Write an LLM prompt for the Perceptor that takes messy terminal output from the Sandbox and extracts structured key-value findings
+- [ ] Write a Storage Script that takes the Perceptor's structured findings and saves them into ChromaDB using RAG Tools
+- [ ] Write a counter for the State Monitor to track loop cycles and stop the program if it hits limit (e.g., max 5 runs)
+- [ ] Add a check in the State Monitor to block any commands targeting IP addresses or domains outside allowed scope
+- [ ] Build the AdaptiveFuzz agent using smolagents to query ChromaDB for current results, plan the next scan steps, and dispatch them to the Huey 
+- [ ] Write an agent prompt for the Report Writer that pulls all text and metadata from ChromaDB and organizes it into a markdown report
+- [ ] Create the main script to accept target domain, manage the loop cycles, run the Huey background worker, and print the final report

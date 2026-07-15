@@ -1,0 +1,5 @@
+smolagents
+huey
+python-dotenv
+llama-cpp-python
+chromadb
