@@ -5,40 +5,48 @@ AdaptiveFuzz is an intelligent, agentic framework that leverages Large Language 
 ## Architecture
 
 ```mermaid
-%%{init: {'flowchart': {'curve': 'natural'}} }%%
+%%{init: {'flowchart': {'curve': 'basis'}} }%%
 flowchart TB
-    user[user]
-    interpreter[interpreter]
-    AdaptiveFuzz[AdaptiveFuzz]
+    user[User]
+    interpreter[Interpreter]
+    
+    subgraph Orchestration
+        AdaptiveFuzz[AdaptiveFuzz]
+        StateMonitor[State & Limits Monitor]
+    end
+    
+    TaskQueue[(Task Queue)]
+    executor[Parallel Executors]
+    
+    subgraph Isolation Environment
+        sandbox[Sandbox w/ Target-Only Egress]
+    end
+    
+    perceptor[Perceptor / Parser]
+    rag[(RAG / Knowledge Base)]
     report_writer[Report Writer]
-    rag[(RAG)]
-    executor[Executor]
-    sandbox[Sandbox]
-    perceptor[Perceptor]
 
-    user <--> |Prompt| interpreter
-    interpreter --> |Details| AdaptiveFuzz
+    user --> |Prompt| interpreter
+    interpreter --> |Set Scope & Limits| StateMonitor
+    interpreter --> |Parsed Details| AdaptiveFuzz
 
-    AdaptiveFuzz <--> |done| report_writer
-    rag --> |Read| report_writer
-    AdaptiveFuzz <--> |in-progress| executor
-    rag --> |Read| AdaptiveFuzz
+    AdaptiveFuzz <--> |Check Constraints| StateMonitor
+    AdaptiveFuzz --> |Dispatch Tasks| TaskQueue
+    TaskQueue --> |Consume| executor
 
-    executor --> |Execution| sandbox
-    sandbox --> |messy output| perceptor
-    perceptor --> |write| rag
+    executor --> |Execute Command| sandbox
+    executor --> |System Errors / Timeouts| AdaptiveFuzz
+    
+    sandbox --> |Raw / Messy Output| perceptor
+    perceptor --> |Write Cleaned Data| rag
+    perceptor --> |Sync Signal: DB Updated| AdaptiveFuzz
 
-    AdaptiveFuzz --> |report| user
+    rag --> |Read Context| AdaptiveFuzz
+    
+    StateMonitor --> |Trigger Done State| report_writer
+    AdaptiveFuzz --> |Task Complete| report_writer
+    rag --> |Read Final Data| report_writer
+    report_writer --> |Deliver Final Report| user
 
     style sandbox stroke-dasharray: 5 5,fill:transparent
 ```
-
-### Components
-
-- **User**: Interacts with the system by providing initial prompts, and eventually receives the final analysis report.
-- **Interpreter**: Processes the user's initial prompt and translates it into structured details and actionable tasks for the main orchestration engine.
-- **AdaptiveFuzz (Core Engine)**: The central orchestration agent that manages the workflow lifecycle, interacting with the executor and utilizing context from the RAG storage.
-- **Executor & Sandbox**: The `Executor` runs tasks and test cases within an isolated `Sandbox` environment to ensure safety and system integrity. 
-- **Perceptor**: Captures the "messy output" from the sandbox execution (such as raw logs, stdout, or traces) and structures it into meaningful insights.
-- **RAG (Knowledge Base)**: A Retrieval-Augmented Generation datastore. The Perceptor writes processed execution results here, which are later read by the core engine to inform subsequent steps and by the report writer to summarize findings.
-- **Report Writer**: Once AdaptiveFuzz completes its execution loop, this component compiles a comprehensive final report based on the intelligence stored in the RAG database.
